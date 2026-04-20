@@ -16,13 +16,7 @@ So sánh `improved_nsga2` với các thuật toán đa mục tiêu từ `pymoo` 
 
 ## Chạy benchmark
 
-### Cách 1: chạy nhanh theo cấu hình mặc định trong file
-
-```powershell
-.\.venv\Scripts\python.exe comparison\benchmark.py
-```
-
-### Cách 2: truyền tham số từ CLI (khuyến nghị)
+### Lệnh chạy đầy đủ (khuyến nghị)
 
 ```powershell
 .\.venv\Scripts\python.exe comparison\benchmark.py --problems zdt1,zdt2,zdt3,zdt4,zdt6 --algorithms improved_nsga2,pymoo_nsga2,pymoo_rnsga2,pymoo_dnsga2,pymoo_mopso --seeds 0,1,2,3,4,5,6,7,8,9 --pop-size 100 --n-gen 200 --csv outputs/benchmark_results.csv --summary-csv outputs/benchmark_summary.csv
@@ -41,12 +35,7 @@ Lưu ý:
 
 ### Chạy ablation (bật/tắt từng cơ chế cải tiến)
 
-So sánh nhanh cấu hình ablation với cấu hình benchmark chuẩn:
-
-- Mặc định để so sánh công bằng, ablation nên giữ cùng `problems`, `seeds`, `pop-size`, `n-gen` như benchmark chuẩn.
-- Điểm khác chính: danh sách `algorithms` được rút gọn để tập trung vào đóng góp cơ chế (full model + các biến thể ablation/incremental, có thể thêm `pymoo_nsga2` làm mốc).
-- Lệnh "ablation nhanh" bên dưới là cấu hình rút gọn thời gian chạy (`zdt1,zdt2,zdt3` và `seeds 0..4`).
-- Lệnh trong checklist phần 4 là cấu hình đầy đủ (5 bài ZDT và `seeds 0..9`) để báo cáo kết quả chính thức.
+Để so sánh công bằng, ablation nên giữ cùng `problems`, `seeds`, `pop-size`, `n-gen` như benchmark chuẩn.
 
 Liệt kê các biến thể ablation của thuật toán cải tiến:
 
@@ -68,12 +57,6 @@ Liệt kê các biến thể incremental (từ baseline rồi bật từng cơ c
 - `improved_nsga2_ablation_no_obl_init`: tắt khởi tạo OBL
 - `improved_nsga2_ablation_no_periodic_obl`: tắt phun OBL định kỳ
 - `improved_nsga2_ablation_no_restart`: tắt cơ chế restart khi trì trệ
-
-Ví dụ chạy ablation nhanh để xem đóng góp từng cơ chế:
-
-```powershell
-.\.venv\Scripts\python.exe comparison\benchmark.py --problems zdt1,zdt2,zdt3 --algorithms improved_nsga2,improved_nsga2_ablation_no_adaptive_de,improved_nsga2_ablation_no_obl_init,improved_nsga2_ablation_no_restart,pymoo_nsga2 --seeds 0,1,2,3,4 --pop-size 100 --n-gen 200 --csv outputs/benchmark_results_ablation.csv --summary-csv outputs/benchmark_summary_ablation.csv
-```
 
 Ví dụ chạy incremental để trả lời câu hỏi "NSGA2 gốc + từng cơ chế cải thiện bao nhiêu":
 
@@ -126,7 +109,7 @@ File sinh ra:
 - `outputs/incremental_chain_overall.csv`: trung bình đóng góp theo từng bước chain
 - `outputs/incremental_chain.md`: bảng Markdown dán thẳng vào luận văn/bài báo
 
-## Quy trình Theo Yêu Cầu Ban Đầu
+## Quy trình
 
 ### 1) Chạy benchmark chuẩn (so sánh thuật toán)
 
@@ -151,34 +134,19 @@ Lưu ý mặc định hiển thị nhãn cột:
 .\.venv\Scripts\python.exe comparison\visualize_benchmark.py outputs/benchmark_results.csv --summary-csv outputs/benchmark_summary.csv --ablation-summary-csv outputs/benchmark_summary_ablation.csv --igd-best-output outputs/benchmark_igd_best_bar.png --hv-best-output outputs/benchmark_hv_best_bar.png --igd-mean-output outputs/benchmark_igd_mean_bar.png --hv-mean-output outputs/benchmark_hv_mean_bar.png --igd-ablation-output outputs/ablation_igd_bar.png --hv-ablation-output outputs/ablation_hv_bar.png --best-table-output outputs/table_best_hv_igd.csv --mean-table-output outputs/table_mean_hv_igd.csv --ablation-table-output outputs/table_ablation_hv_igd.csv --best-table-md-output outputs/table_best_hv_igd.md --mean-table-md-output outputs/table_mean_hv_igd.md --ablation-table-md-output outputs/table_ablation_hv_igd.md --ui-scale 1.2
 ```
 
-### 3a) Chỉ vẽ biểu đồ so sánh thuật toán (không vẽ ablation)
-
-Nếu chỉ cần 4 biểu đồ cột HV/IGD của các thuật toán so sánh (best + mean),
-hãy truyền một đường dẫn ablation không tồn tại để script tự bỏ qua phần ablation:
-
-```powershell
-.\.venv\Scripts\python.exe comparison\visualize_benchmark.py outputs/benchmark_results.csv --summary-csv outputs/benchmark_summary.csv --ablation-summary-csv outputs/_no_ablation.csv --igd-best-output outputs/benchmark_igd_best_bar.png --hv-best-output outputs/benchmark_hv_best_bar.png --igd-mean-output outputs/benchmark_igd_mean_bar.png --hv-mean-output outputs/benchmark_hv_mean_bar.png --best-table-output outputs/table_best_hv_igd.csv --mean-table-output outputs/table_mean_hv_igd.csv --best-table-md-output outputs/table_best_hv_igd.md --mean-table-md-output outputs/table_mean_hv_igd.md --ui-scale 1.2
-```
-
-Với lệnh này, script sẽ chỉ xuất:
-
-- Biểu đồ: `benchmark_igd_best_bar.png`, `benchmark_hv_best_bar.png`, `benchmark_igd_mean_bar.png`, `benchmark_hv_mean_bar.png`
-- Bảng CSV: `table_best_hv_igd.csv`, `table_mean_hv_igd.csv`
-- Bảng Markdown: `table_best_hv_igd.md`, `table_mean_hv_igd.md`
-
 Kết quả đúng theo yêu cầu ban đầu:
 
 - Biểu đồ: `benchmark_igd_best_bar.png`, `benchmark_hv_best_bar.png`, `benchmark_igd_mean_bar.png`, `benchmark_hv_mean_bar.png`, `ablation_igd_bar.png`, `ablation_hv_bar.png`
 - Bảng CSV: `table_best_hv_igd.csv`, `table_mean_hv_igd.csv`, `table_ablation_hv_igd.csv`
 - Bảng Markdown: `table_best_hv_igd.md`, `table_mean_hv_igd.md`, `table_ablation_hv_igd.md`
 
-### 4) (Tùy chọn) Vẽ nhanh 2 biểu đồ HV/IGD trực tiếp từ bảng ablation CSV
+### 4) (Tùy chọn) Vẽ 2 biểu đồ HV/IGD trực tiếp từ bảng ablation CSV
 
 ```powershell
 .\.venv\Scripts\python.exe comparison\plot_hv_igd_from_table.py outputs/table_ablation_hv_igd.csv --hv-output outputs/ablation_hv_from_table.png --igd-output outputs/ablation_igd_from_table.png --ui-scale 1.2
 ```
 
-Vẽ nhanh 2 biểu đồ HV/IGD từ bảng incremental so với `pymoo_nsga2`:
+Vẽ 2 biểu đồ HV/IGD từ bảng incremental so với `pymoo_nsga2`:
 
 ```powershell
 .\.venv\Scripts\python.exe comparison\plot_hv_igd_from_table.py outputs/table_incremental_vs_nsga2_hv_igd.csv --hv-output outputs/incremental_vs_nsga2_hv_from_table.png --igd-output outputs/incremental_vs_nsga2_igd_from_table.png --ui-scale 1.2
