@@ -177,7 +177,15 @@ def _make_pymoo_moead(problem: Any, pop_size: int) -> Any:
     except ImportError as exc:
         raise AlgorithmUnavailableError("MOEAD is not available in this pymoo version") from exc
 
-    ref_dirs = get_reference_directions("das-dennis", int(problem.n_obj), n_partitions=max(12, int(problem.n_obj) * 6))
+    n_obj = int(problem.n_obj)
+    # Keep MOEAD budget aligned with requested pop_size as closely as possible.
+    try:
+        ref_dirs = get_reference_directions("energy", n_obj, n_points=max(2, int(pop_size)), seed=1)
+    except Exception:
+        if n_obj == 2:
+            ref_dirs = get_reference_directions("das-dennis", n_obj, n_partitions=max(1, int(pop_size) - 1))
+        else:
+            ref_dirs = get_reference_directions("das-dennis", n_obj, n_partitions=max(12, n_obj * 6))
     neighborhood = min(20, max(2, len(ref_dirs) - 1))
 
     try:
@@ -229,24 +237,21 @@ def _run_pymoo_algorithm(
 
 
 def _extract_population_from_result(result: Any) -> np.ndarray:
-    if getattr(result, "F", None) is not None:
-        population = np.asarray(result.F)
-        if population.size > 0:
-            if population.ndim == 1:
-                return population.reshape(1, -1)
-            return population
-
     if getattr(result, "pop", None) is not None:
         try:
             pop_f = result.pop.get("F")
             population = np.asarray(pop_f)
-            if population.ndim == 1:
-                return population.reshape(1, -1)
-            return population
+            if population.size > 0:
+                if population.ndim == 1:
+                    return population.reshape(1, -1)
+                return population
         except Exception as exc:
             raise RuntimeError("Unable to extract population objectives from pymoo result") from exc
 
-    raise RuntimeError("pymoo returned an empty result without objective values")
+    raise RuntimeError(
+        "pymoo result does not expose final population (result.pop). "
+        "Cannot ensure fair comparison on a shared population semantic."
+    )
 
 
 def run_improved_nsga2(
@@ -631,6 +636,13 @@ def run_configured_comparison(
     summary_csv_path: str = DEFAULT_SUMMARY_CSV_PATH,
     problem_n_vars: Optional[Mapping[str, int]] = None,
 ) -> List[BenchmarkResult]:
+    if pop_size <= 0:
+        raise ValueError(f"pop_size must be > 0, got {pop_size}")
+    if n_gen <= 0:
+        raise ValueError(f"n_gen must be > 0, got {n_gen}")
+    if not seeds:
+        raise ValueError("seeds must not be empty")
+
     n_var_map = dict(problem_n_vars or DEFAULT_PROBLEM_N_VARS)
     problems = {
         name: get_benchmark_problem(name, n_var=n_var_map.get(name, 30))
@@ -751,6 +763,15 @@ def _parse_csv_int_list(value: str) -> List[int]:
     return [int(item.strip()) for item in value.split(",") if item.strip()]
 
 
+def _validate_cli_inputs(problem_names: Sequence[str], algorithm_names: Sequence[str], seeds: Sequence[int]) -> None:
+    if not problem_names:
+        raise ValueError("--problems cannot be empty")
+    if not algorithm_names:
+        raise ValueError("--algorithms cannot be empty")
+    if not seeds:
+        raise ValueError("--seeds cannot be empty")
+
+
 def _build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run ZDT benchmark comparison for multiple algorithms")
     parser.add_argument(
@@ -806,6 +827,7 @@ def main() -> None:
     problem_names = _parse_csv_list(args.problems)
     algorithm_names = _parse_csv_list(args.algorithms)
     seeds = _parse_csv_int_list(args.seeds)
+    _validate_cli_inputs(problem_names, algorithm_names, seeds)
 
     run_configured_comparison(
         problem_names=problem_names,

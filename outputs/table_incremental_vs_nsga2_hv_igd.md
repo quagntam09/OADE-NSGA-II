@@ -1,0 +1,34 @@
+# Ablation HV and IGD Table
+
+| problem | algorithm | hv_mean | igd_mean | delta_hv_vs_full | delta_igd_vs_full |
+| --- | --- | --- | --- | --- | --- |
+| zdt1 | improved_nsga2_incremental_baseline | 0.855501 | 0.021590 | -0.012850 | 0.016550 |
+| zdt1 | improved_nsga2_incremental_plus_de_adaptive | 0.870890 | 0.004359 | 0.002540 | -0.000681 |
+| zdt1 | improved_nsga2_incremental_plus_de_fixed | 0.870929 | 0.004331 | 0.002578 | -0.000710 |
+| zdt1 | improved_nsga2_incremental_plus_obl_init | 0.852238 | 0.026372 | -0.016113 | 0.021332 |
+| zdt1 | improved_nsga2_incremental_plus_periodic_obl | 0.855310 | 0.023939 | -0.013040 | 0.018898 |
+| zdt1 | improved_nsga2_incremental_plus_restart | 0.851849 | 0.024261 | -0.016502 | 0.019221 |
+| zdt2 | improved_nsga2_incremental_baseline | 0.347537 | 0.178066 | -0.186453 | 0.172564 |
+| zdt2 | improved_nsga2_incremental_plus_de_adaptive | 0.537603 | 0.004884 | 0.003612 | -0.000618 |
+| zdt2 | improved_nsga2_incremental_plus_de_fixed | 0.537656 | 0.004689 | 0.003665 | -0.000813 |
+| zdt2 | improved_nsga2_incremental_plus_obl_init | 0.482277 | 0.038577 | -0.051714 | 0.033076 |
+| zdt2 | improved_nsga2_incremental_plus_periodic_obl | 0.368154 | 0.162894 | -0.165837 | 0.157393 |
+| zdt2 | improved_nsga2_incremental_plus_restart | 0.329974 | 0.203709 | -0.204017 | 0.198207 |
+| zdt3 | improved_nsga2_incremental_baseline | 1.070627 | 0.042029 | -0.022219 | 0.036417 |
+| zdt3 | improved_nsga2_incremental_plus_de_adaptive | 1.095892 | 0.005283 | 0.003047 | -0.000328 |
+| zdt3 | improved_nsga2_incremental_plus_de_fixed | 1.095955 | 0.004848 | 0.003110 | -0.000764 |
+| zdt3 | improved_nsga2_incremental_plus_obl_init | 1.056952 | 0.055549 | -0.035893 | 0.049938 |
+| zdt3 | improved_nsga2_incremental_plus_periodic_obl | 1.088944 | 0.016807 | -0.003901 | 0.011196 |
+| zdt3 | improved_nsga2_incremental_plus_restart | 1.071087 | 0.042036 | -0.021758 | 0.036425 |
+| zdt4 | improved_nsga2_incremental_baseline | 0.000000 | 6.498350 | -0.862416 | 6.490396 |
+| zdt4 | improved_nsga2_incremental_plus_de_adaptive | 0.473343 | 0.275379 | -0.389073 | 0.267425 |
+| zdt4 | improved_nsga2_incremental_plus_de_fixed | 0.246338 | 0.731413 | -0.616079 | 0.723459 |
+| zdt4 | improved_nsga2_incremental_plus_obl_init | 0.000000 | 5.806837 | -0.862416 | 5.798883 |
+| zdt4 | improved_nsga2_incremental_plus_periodic_obl | 0.006997 | 2.499120 | -0.855419 | 2.491166 |
+| zdt4 | improved_nsga2_incremental_plus_restart | 0.000000 | 6.498350 | -0.862416 | 6.490396 |
+| zdt6 | improved_nsga2_incremental_baseline | 0.401796 | 0.004470 | 0.018942 | -0.012659 |
+| zdt6 | improved_nsga2_incremental_plus_de_adaptive | 0.403080 | 0.003876 | 0.020226 | -0.013253 |
+| zdt6 | improved_nsga2_incremental_plus_de_fixed | 0.403159 | 0.003861 | 0.020305 | -0.013268 |
+| zdt6 | improved_nsga2_incremental_plus_obl_init | 0.402321 | 0.004201 | 0.019468 | -0.012928 |
+| zdt6 | improved_nsga2_incremental_plus_periodic_obl | 0.401807 | 0.004377 | 0.018953 | -0.012752 |
+| zdt6 | improved_nsga2_incremental_plus_restart | 0.401796 | 0.004470 | 0.018942 | -0.012659 |

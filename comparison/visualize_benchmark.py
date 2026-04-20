@@ -48,6 +48,12 @@ DEFAULT_ABLATION_TABLE_MD_PATH = "outputs/table_ablation_hv_igd.md"
 
 DEFAULT_ABLATION_PREFIX = "improved_nsga2_ablation_"
 DEFAULT_FULL_ALGORITHM = "improved_nsga2"
+DEFAULT_LABEL_EXPONENT = -1
+
+
+def _format_scaled_label(value: float, digits: int = 2, exponent: int = DEFAULT_LABEL_EXPONENT) -> str:
+    scaled = value / (10 ** exponent)
+    return f"{scaled:.{digits}f}"
 
 
 def _load_results_csv(path: str) -> List[Dict[str, object]]:
@@ -309,7 +315,7 @@ def _plot_grouped_problem_bar(
             color=cmap(idx % cmap.N),
             alpha=0.9,
         )
-        labels = [f"{v:.3e}" if abs(v) < 1e-3 else f"{v:.4f}" for v in series]
+        labels = [_format_scaled_label(v, digits=2, exponent=DEFAULT_LABEL_EXPONENT) for v in series]
         ax.bar_label(bars, labels=labels, padding=3, fontsize=max(7, int(8 * ui_scale)))
 
     ax.set_title(title, fontsize=13 * ui_scale)
@@ -320,6 +326,16 @@ def _plot_grouped_problem_bar(
     ax.tick_params(axis="y", labelsize=10 * ui_scale)
     ax.grid(axis="y", alpha=0.25)
     ax.legend(fontsize=8 * ui_scale)
+    ax.text(
+        0.995,
+        0.99,
+        rf"Bar labels scaled by $\times 10^{{{DEFAULT_LABEL_EXPONENT}}}$",
+        transform=ax.transAxes,
+        ha="right",
+        va="top",
+        fontsize=8 * ui_scale,
+        color="dimgray",
+    )
 
     fig.savefig(output, dpi=300)
     plt.close(fig)
@@ -349,7 +365,7 @@ def _plot_ablation_bar(
         color=[cmap(i % cmap.N) for i in range(len(algorithms))],
         alpha=0.9,
     )
-    labels = [f"{v:.3e}" if abs(v) < 1e-3 else f"{v:.4f}" for v in series]
+    labels = [_format_scaled_label(v, digits=2, exponent=DEFAULT_LABEL_EXPONENT) for v in series]
     ax.bar_label(bars, labels=labels, padding=3, fontsize=max(7, int(8 * ui_scale)))
 
     ax.set_title(title, fontsize=13 * ui_scale)
@@ -359,6 +375,16 @@ def _plot_ablation_bar(
     ax.set_xticklabels(short_labels, rotation=20, ha="right", fontsize=9 * ui_scale)
     ax.tick_params(axis="y", labelsize=10 * ui_scale)
     ax.grid(axis="y", alpha=0.25)
+    ax.text(
+        0.995,
+        0.99,
+        rf"Bar labels scaled by $\times 10^{{{DEFAULT_LABEL_EXPONENT}}}$",
+        transform=ax.transAxes,
+        ha="right",
+        va="top",
+        fontsize=8 * ui_scale,
+        color="dimgray",
+    )
 
     fig.savefig(output, dpi=300)
     plt.close(fig)

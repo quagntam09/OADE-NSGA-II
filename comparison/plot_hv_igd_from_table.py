@@ -26,6 +26,16 @@ import numpy as np
 DEFAULT_INPUT_CSV = "outputs/table_ablation_hv_igd.csv"
 DEFAULT_HV_OUTPUT = "outputs/ablation_hv_from_table.png"
 DEFAULT_IGD_OUTPUT = "outputs/ablation_igd_from_table.png"
+DEFAULT_LABEL_EXPONENT = -1
+
+
+def _format_scientific_label(
+    value: float,
+    mantissa_digits: int = 2,
+    exponent: int = DEFAULT_LABEL_EXPONENT,
+) -> str:
+    scaled = value / (10 ** exponent)
+    return f"{scaled:.{mantissa_digits}f}"
 
 
 def _load_rows(path: str) -> List[Dict[str, object]]:
@@ -108,7 +118,7 @@ def _plot_grouped_bar(
             color=cmap(i % cmap.N),
             alpha=0.9,
         )
-        labels = [f"{v:.3e}" if abs(v) < 1e-3 else f"{v:.4f}" for v in values]
+        labels = [_format_scientific_label(v, mantissa_digits=2, exponent=DEFAULT_LABEL_EXPONENT) for v in values]
         ax.bar_label(bars, labels=labels, padding=3, fontsize=max(7, int(8 * ui_scale)))
 
     ax.set_title(title, fontsize=13 * ui_scale)
@@ -119,6 +129,16 @@ def _plot_grouped_bar(
     ax.tick_params(axis="y", labelsize=10 * ui_scale)
     ax.grid(axis="y", alpha=0.25)
     ax.legend(fontsize=9 * ui_scale)
+    ax.text(
+        0.995,
+        0.99,
+        rf"Bar labels scaled by $\times 10^{{{DEFAULT_LABEL_EXPONENT}}}$",
+        transform=ax.transAxes,
+        ha="right",
+        va="top",
+        fontsize=8 * ui_scale,
+        color="dimgray",
+    )
 
     fig.savefig(path, dpi=300)
     plt.close(fig)

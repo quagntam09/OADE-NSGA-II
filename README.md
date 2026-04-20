@@ -142,9 +142,29 @@ File sinh ra:
 
 ### 3) Vẽ đúng 6 biểu đồ cột + xuất 3 bảng (CSV/Markdown)
 
+Lưu ý mặc định hiển thị nhãn cột:
+
+- Tất cả biểu đồ cột từ `comparison/visualize_benchmark.py` và `comparison/plot_hv_igd_from_table.py` đều hiển thị nhãn đã scale theo `×10^-1`.
+- Trên cột chỉ hiện số rút gọn; chú thích scale được ghi một lần trên hình.
+
 ```powershell
 .\.venv\Scripts\python.exe comparison\visualize_benchmark.py outputs/benchmark_results.csv --summary-csv outputs/benchmark_summary.csv --ablation-summary-csv outputs/benchmark_summary_ablation.csv --igd-best-output outputs/benchmark_igd_best_bar.png --hv-best-output outputs/benchmark_hv_best_bar.png --igd-mean-output outputs/benchmark_igd_mean_bar.png --hv-mean-output outputs/benchmark_hv_mean_bar.png --igd-ablation-output outputs/ablation_igd_bar.png --hv-ablation-output outputs/ablation_hv_bar.png --best-table-output outputs/table_best_hv_igd.csv --mean-table-output outputs/table_mean_hv_igd.csv --ablation-table-output outputs/table_ablation_hv_igd.csv --best-table-md-output outputs/table_best_hv_igd.md --mean-table-md-output outputs/table_mean_hv_igd.md --ablation-table-md-output outputs/table_ablation_hv_igd.md --ui-scale 1.2
 ```
+
+### 3a) Chỉ vẽ biểu đồ so sánh thuật toán (không vẽ ablation)
+
+Nếu chỉ cần 4 biểu đồ cột HV/IGD của các thuật toán so sánh (best + mean),
+hãy truyền một đường dẫn ablation không tồn tại để script tự bỏ qua phần ablation:
+
+```powershell
+.\.venv\Scripts\python.exe comparison\visualize_benchmark.py outputs/benchmark_results.csv --summary-csv outputs/benchmark_summary.csv --ablation-summary-csv outputs/_no_ablation.csv --igd-best-output outputs/benchmark_igd_best_bar.png --hv-best-output outputs/benchmark_hv_best_bar.png --igd-mean-output outputs/benchmark_igd_mean_bar.png --hv-mean-output outputs/benchmark_hv_mean_bar.png --best-table-output outputs/table_best_hv_igd.csv --mean-table-output outputs/table_mean_hv_igd.csv --best-table-md-output outputs/table_best_hv_igd.md --mean-table-md-output outputs/table_mean_hv_igd.md --ui-scale 1.2
+```
+
+Với lệnh này, script sẽ chỉ xuất:
+
+- Biểu đồ: `benchmark_igd_best_bar.png`, `benchmark_hv_best_bar.png`, `benchmark_igd_mean_bar.png`, `benchmark_hv_mean_bar.png`
+- Bảng CSV: `table_best_hv_igd.csv`, `table_mean_hv_igd.csv`
+- Bảng Markdown: `table_best_hv_igd.md`, `table_mean_hv_igd.md`
 
 Kết quả đúng theo yêu cầu ban đầu:
 
@@ -156,6 +176,12 @@ Kết quả đúng theo yêu cầu ban đầu:
 
 ```powershell
 .\.venv\Scripts\python.exe comparison\plot_hv_igd_from_table.py outputs/table_ablation_hv_igd.csv --hv-output outputs/ablation_hv_from_table.png --igd-output outputs/ablation_igd_from_table.png --ui-scale 1.2
+```
+
+Vẽ nhanh 2 biểu đồ HV/IGD từ bảng incremental so với `pymoo_nsga2`:
+
+```powershell
+.\.venv\Scripts\python.exe comparison\plot_hv_igd_from_table.py outputs/table_incremental_vs_nsga2_hv_igd.csv --hv-output outputs/incremental_vs_nsga2_hv_from_table.png --igd-output outputs/incremental_vs_nsga2_igd_from_table.png --ui-scale 1.2
 ```
 
 ### 5) (Tùy chọn) So sánh từng cơ chế incremental với NSGA2 gốc
