@@ -45,7 +45,7 @@ class MechanismConfig:
     use_de_operator: bool = True
     use_adaptive_de: bool = True
     use_periodic_obl_injection: bool = True
-    obl_injection_period: int = 10
+    obl_injection_period: Optional[int] = None
     use_stagnation_restart: bool = True
 
 
@@ -58,7 +58,7 @@ class NSGA2ImprovedSmart:
     - Khởi tạo OBL + Sobol/LHS thay vì phân phối đều thuần tuý
     - Đột biến DE/current-to-pbest/1 hướng láng giềng thay SBX đơn thuần
     - Tham số F, CR tự thích nghi theo Lehmer-mean (SaDE-style)
-    - Phun đa dạng định kỳ qua OBL mỗi 10 thế hệ
+    - Phun đa dạng định kỳ qua OBL mỗi N thế hệ (N = kích thước quần thể)
     - Phát hiện trì trệ và partial restart khi ideal point ngừng cải thiện
     """
 
@@ -78,14 +78,17 @@ class NSGA2ImprovedSmart:
         self.xu       = problem.xu
         self.mechanism_config = mechanism_config or MechanismConfig()
 
-        # Tham số DE thích nghi — khởi đầu tại điểm trung tính
-        self.mean_F  = 0.5  # trung bình phân phối Cauchy của scale factor F
-        self.mean_CR = 0.5  # trung bình phân phối Normal của crossover rate CR
+        # Khởi tạo ADE theo cấu hình: F ~ U[0.4, 0.9], CR ~ U[0.1, 0.9]
+        self.mean_F  = float(np.random.uniform(0.4, 0.9))
+        self.mean_CR = float(np.random.uniform(0.1, 0.9))
         self.prob_de = 0.5 if self.mechanism_config.use_de_operator else 0.0
 
-        # Bài toán nhiều mục tiêu cần láng giềng rộng hơn để ước lượng tốt
-        min_neighbors = 10 if self.n_obj >= 3 else 5
-        self.n_neighbors = max(min_neighbors, int(pop_size * 0.15))
+        # K-láng giềng cho ADE
+        self.n_neighbors = 5
+
+        # Chu kỳ phun OBL: mặc định mỗi N thế hệ (N = pop_size)
+        cfg_period = self.mechanism_config.obl_injection_period
+        self.obl_injection_period = self.pop_size if cfg_period is None else max(1, int(cfg_period))
 
         # Tham số SBX và Polynomial Mutation
         self.pc    = 0.9                                           # xác suất lai ghép
@@ -94,7 +97,7 @@ class NSGA2ImprovedSmart:
         self.eta_m = 20.0
 
         # Ngưỡng phát hiện trì trệ
-        self.stagnation_patience   = n_gen // 4  # số thế hệ không cải thiện trước khi restart
+        self.stagnation_patience   = 20          # số thế hệ không cải thiện trước khi restart
         self.stagnation_tolerance  = 1e-4        # cải thiện nhỏ hơn ngưỡng này bị coi là trì trệ
         self.restart_elite_ratio   = 0.3         # tỉ lệ cá thể tốt giữ lại sau restart
 
@@ -157,7 +160,7 @@ class NSGA2ImprovedSmart:
 
     # Sinh con lai
     def _generate_offspring(self, gen: int) -> List[Individual]:
-        """Sinh toàn bộ con lai cho thế hệ này: DE hoặc SBX theo prob_de, thêm OBL mỗi 10 thế hệ."""
+        """Sinh toàn bộ con lai cho thế hệ này: DE hoặc SBX theo prob_de, thêm OBL theo chu kỳ cấu hình."""
         neighbor_indices = get_neighborhood_indices(self.population, self.n_neighbors)
 
         offspring = [
@@ -167,8 +170,8 @@ class NSGA2ImprovedSmart:
 
         if (
             self.mechanism_config.use_periodic_obl_injection
-            and self.mechanism_config.obl_injection_period > 0
-            and gen % self.mechanism_config.obl_injection_period == 0
+            and self.obl_injection_period > 0
+            and gen % self.obl_injection_period == 0
         ):
             offspring += generate_obl_offspring(self.population, self.problem, self.xl, self.xu)
 
@@ -226,7 +229,8 @@ class NSGA2ImprovedSmart:
         new_inds = [_make_evaluated_individual(x_new[i], f_new[i]) for i in range(n_new)]
 
         self.population = environmental_selection(elite + new_inds, self.pop_size, self.n_obj)
-        self.mean_F = self.mean_CR = 0.5  # quên lịch sử thích nghi, tái học từ đầu
+        self.mean_F = float(np.random.uniform(0.4, 0.9))
+        self.mean_CR = float(np.random.uniform(0.1, 0.9))
 
     def _fill_if_too_small(self, population: List[Individual]) -> List[Individual]:
         """Bổ sung cá thể ngẫu nhiên nếu remove_duplicates làm quần thể thiếu hụt."""

@@ -56,16 +56,16 @@ def _load_rows(path: str) -> List[Dict[str, object]]:
 
 def _short_algorithm_label(name: str) -> str:
     mapping = {
-        "improved_nsga2_ablation_no_adaptive_de": "no adaptive DE",
-        "improved_nsga2_ablation_no_obl_init": "no OBL init",
-        "improved_nsga2_ablation_no_periodic_obl": "no periodic OBL",
-        "improved_nsga2_ablation_no_restart": "no restart",
-        "improved_nsga2_ablation_sbx_only": "SBX only",
+        "OADE_NSGA2_ablation_no_adaptive_de": "no adaptive DE",
+        "OADE_NSGA2_ablation_no_obl_init": "no OBL init",
+        "OADE_NSGA2_ablation_no_periodic_obl": "no periodic OBL",
+        "OADE_NSGA2_ablation_no_restart": "no restart",
+        "OADE_NSGA2_ablation_sbx_only": "SBX only",
     }
     if name in mapping:
         return mapping[name]
 
-    for prefix in ("improved_nsga2_ablation_", "improved_nsga2_", "pymoo_"):
+    for prefix in ("OADE_NSGA2_ablation_", "OADE_NSGA2_", "pymoo_"):
         if name.startswith(prefix):
             name = name[len(prefix) :]
             break
@@ -188,3 +188,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+

@@ -10,7 +10,7 @@ from typing import List
 
 import numpy as np
 from scipy.spatial.distance import cdist
-from scipy.stats import cauchy, qmc
+from scipy.stats import qmc
 
 try:
     from .core import CreationMode, Individual, ProblemWrapper
@@ -113,13 +113,23 @@ def de_mutation(
     70% dùng DE/current-to-pbest/1 hướng láng giềng — khai thác cục bộ.
     30% dùng DE/rand/1 toàn cục — duy trì đa dạng.
 
-    Cả hai chiến lược cùng lấy mẫu từ một phân phối thích nghi:
-        F  ~ Cauchy(mean_F,  0.1), clip vào [0.1, 1.0]
-        CR ~ Normal(mean_CR, 0.1), clip vào [0.0, 1.0]
+    Cả hai chiến lược lấy mẫu đều trong miền cấu hình ADE:
+        F  ~ Uniform quanh mean_F, kẹp trong [0.4, 0.9]
+        CR ~ Uniform quanh mean_CR, kẹp trong [0.1, 0.9]
     """
     target     = population[target_idx]
-    F          = float(np.clip(cauchy.rvs(loc=mean_F,  scale=0.1), 0.1, 1.0))
-    CR         = float(np.clip(np.random.normal(mean_CR, 0.1),      0.0, 1.0))
+    f_low      = max(0.4, mean_F - 0.1)
+    f_high     = min(0.9, mean_F + 0.1)
+    if f_low >= f_high:
+        f_low, f_high = 0.4, 0.9
+
+    cr_low     = max(0.1, mean_CR - 0.1)
+    cr_high    = min(0.9, mean_CR + 0.1)
+    if cr_low >= cr_high:
+        cr_low, cr_high = 0.1, 0.9
+
+    F          = float(np.random.uniform(f_low, f_high))
+    CR         = float(np.random.uniform(cr_low, cr_high))
     use_global = np.random.rand() < 0.3
 
     if use_global:

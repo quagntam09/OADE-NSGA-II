@@ -27,12 +27,12 @@ DEFAULT_SUMMARY_CSV = "outputs/benchmark_summary_incremental.csv"
 DEFAULT_OUTPUT_DIR = "outputs"
 DEFAULT_OUTPUT_PREFIX = "incremental_chain"
 DEFAULT_CHAIN: Sequence[str] = (
-    "improved_nsga2_incremental_baseline",
-    "improved_nsga2_incremental_plus_obl_init",
-    "improved_nsga2_incremental_plus_de_fixed",
-    "improved_nsga2_incremental_plus_de_adaptive",
-    "improved_nsga2_incremental_plus_periodic_obl",
-    "improved_nsga2_incremental_plus_restart",
+    "OADE_NSGA2_incremental_baseline",
+    "OADE_NSGA2_incremental_plus_obl_init",
+    "OADE_NSGA2_incremental_plus_de_fixed",
+    "OADE_NSGA2_incremental_plus_de_adaptive",
+    "OADE_NSGA2_incremental_plus_periodic_obl",
+    "OADE_NSGA2_incremental_plus_restart",
 )
 
 
@@ -288,3 +288,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+

@@ -46,8 +46,8 @@ DEFAULT_BEST_TABLE_MD_PATH = "outputs/table_best_hv_igd.md"
 DEFAULT_MEAN_TABLE_MD_PATH = "outputs/table_mean_hv_igd.md"
 DEFAULT_ABLATION_TABLE_MD_PATH = "outputs/table_ablation_hv_igd.md"
 
-DEFAULT_ABLATION_PREFIX = "improved_nsga2_ablation_"
-DEFAULT_FULL_ALGORITHM = "improved_nsga2"
+DEFAULT_ABLATION_PREFIX = "OADE_NSGA2_ablation_"
+DEFAULT_FULL_ALGORITHM = "OADE_NSGA2"
 DEFAULT_LABEL_EXPONENT = -1
 
 
@@ -136,12 +136,12 @@ def _write_markdown_table(path: str, rows: List[Dict[str, object]], title: str) 
 
 def _short_algorithm_label(algorithm: str) -> str:
     known = {
-        "improved_nsga2": "full model",
-        "improved_nsga2_ablation_sbx_only": "SBX only",
-        "improved_nsga2_ablation_no_adaptive_de": "no adaptive DE",
-        "improved_nsga2_ablation_no_obl_init": "no OBL init",
-        "improved_nsga2_ablation_no_periodic_obl": "no periodic OBL",
-        "improved_nsga2_ablation_no_restart": "no restart",
+        "OADE_NSGA2": "full model",
+        "OADE_NSGA2_ablation_sbx_only": "SBX only",
+        "OADE_NSGA2_ablation_no_adaptive_de": "no adaptive DE",
+        "OADE_NSGA2_ablation_no_obl_init": "no OBL init",
+        "OADE_NSGA2_ablation_no_periodic_obl": "no periodic OBL",
+        "OADE_NSGA2_ablation_no_restart": "no restart",
         "pymoo_nsga2": "NSGA-II",
     }
     if algorithm in known:
@@ -149,9 +149,9 @@ def _short_algorithm_label(algorithm: str) -> str:
 
     label = algorithm
     for prefix in (
-        "improved_nsga2_ablation_",
-        "improved_nsga2_incremental_",
-        "improved_nsga2_",
+        "OADE_NSGA2_ablation_",
+        "OADE_NSGA2_incremental_",
+        "OADE_NSGA2_",
         "pymoo_",
     ):
         if label.startswith(prefix):
@@ -213,21 +213,39 @@ def _build_ablation_table(
     full_algorithm: str,
     ablation_prefix: str,
 ) -> List[Dict[str, object]]:
+    def _aliases(name: str) -> List[str]:
+        aliases = [name]
+        if name.startswith("OADE_NSGA2"):
+            aliases.append(name.replace("OADE_NSGA2", "improved_nsga2", 1))
+        elif name.startswith("improved_nsga2"):
+            aliases.append(name.replace("improved_nsga2", "OADE_NSGA2", 1))
+        return aliases
+
     lookup: Dict[Tuple[str, str], Dict[str, object]] = {
         (str(row["problem"]), str(row["algorithm"])): row for row in summary_rows
     }
 
     problems = sorted({str(row["problem"]) for row in summary_rows})
     algorithms = sorted({str(row["algorithm"]) for row in summary_rows})
-    ablation_algorithms = [algo for algo in algorithms if algo.startswith(ablation_prefix)]
+    ablation_prefixes = _aliases(ablation_prefix)
+    full_algorithm_names = _aliases(full_algorithm)
+
+    ablation_algorithms = [
+        algo for algo in algorithms if any(algo.startswith(prefix) for prefix in ablation_prefixes)
+    ]
 
     table: List[Dict[str, object]] = []
     for problem in problems:
-        full_key = (problem, full_algorithm)
-        if full_key not in lookup:
+        full_row = None
+        for full_name in full_algorithm_names:
+            full_key = (problem, full_name)
+            if full_key in lookup:
+                full_row = lookup[full_key]
+                break
+
+        if full_row is None:
             continue
 
-        full_row = lookup[full_key]
         full_hv = float(full_row["hv_mean"])
         full_igd = float(full_row["igd_mean"])
 
@@ -553,3 +571,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+

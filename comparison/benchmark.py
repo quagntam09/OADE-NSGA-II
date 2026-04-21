@@ -1,6 +1,6 @@
 """
 Run multi-objective benchmark experiments on ZDT problems using pymoo baselines
-and the existing improved NSGA-II implementation.
+and the existing OADE_NSGA2 implementation.
 """
 
 from __future__ import annotations
@@ -33,14 +33,14 @@ from algorithm_src.core import ProblemWrapper
 
 
 DEFAULT_PROBLEM_NAMES: Sequence[str] = ("zdt1", "zdt2", "zdt3", "zdt4", "zdt6")
-DEFAULT_SEEDS: Sequence[int] = tuple(range(10))
+DEFAULT_SEEDS: Sequence[int] = tuple(range(30))
 DEFAULT_POP_SIZE: int = 100
 DEFAULT_N_GEN: int = 200
 DEFAULT_OUTPUT_DIR: str = "outputs"
 DEFAULT_CSV_PATH: str = "outputs/benchmark_results.csv"
 DEFAULT_SUMMARY_CSV_PATH: str = "outputs/benchmark_summary.csv"
 DEFAULT_ALGORITHMS: Sequence[str] = (
-    "improved_nsga2",
+    "OADE_NSGA2",
     "pymoo_nsga2",
     "pymoo_rnsga2",
     "pymoo_dnsga2",
@@ -49,19 +49,19 @@ DEFAULT_ALGORITHMS: Sequence[str] = (
     "pymoo_sms_emoa",
 )
 DEFAULT_ABLATION_ALGORITHMS: Sequence[str] = (
-    "improved_nsga2_ablation_sbx_only",
-    "improved_nsga2_ablation_no_adaptive_de",
-    "improved_nsga2_ablation_no_obl_init",
-    "improved_nsga2_ablation_no_periodic_obl",
-    "improved_nsga2_ablation_no_restart",
+    "OADE_NSGA2_ablation_sbx_only",
+    "OADE_NSGA2_ablation_no_adaptive_de",
+    "OADE_NSGA2_ablation_no_obl_init",
+    "OADE_NSGA2_ablation_no_periodic_obl",
+    "OADE_NSGA2_ablation_no_restart",
 )
 DEFAULT_INCREMENTAL_ALGORITHMS: Sequence[str] = (
-    "improved_nsga2_incremental_baseline",
-    "improved_nsga2_incremental_plus_obl_init",
-    "improved_nsga2_incremental_plus_de_fixed",
-    "improved_nsga2_incremental_plus_de_adaptive",
-    "improved_nsga2_incremental_plus_periodic_obl",
-    "improved_nsga2_incremental_plus_restart",
+    "OADE_NSGA2_incremental_baseline",
+    "OADE_NSGA2_incremental_plus_obl_init",
+    "OADE_NSGA2_incremental_plus_de_fixed",
+    "OADE_NSGA2_incremental_plus_de_adaptive",
+    "OADE_NSGA2_incremental_plus_periodic_obl",
+    "OADE_NSGA2_incremental_plus_restart",
 )
 
 DEFAULT_PROBLEM_N_VARS: Dict[str, int] = {
@@ -254,7 +254,7 @@ def _extract_population_from_result(result: Any) -> np.ndarray:
     )
 
 
-def run_improved_nsga2(
+def run_OADE_NSGA2(
     problem: Any,
     seed: int,
     pop_size: int,
@@ -276,29 +276,29 @@ def run_improved_nsga2(
     return front, population
 
 
-def get_improved_ablation_configs() -> Dict[str, MechanismConfig]:
+def get_oade_ablation_configs() -> Dict[str, MechanismConfig]:
     return {
-        "improved_nsga2": MechanismConfig(),
-        "improved_nsga2_ablation_sbx_only": MechanismConfig(
+        "OADE_NSGA2": MechanismConfig(),
+        "OADE_NSGA2_ablation_sbx_only": MechanismConfig(
             use_de_operator=False,
             use_adaptive_de=False,
         ),
-        "improved_nsga2_ablation_no_adaptive_de": MechanismConfig(
+        "OADE_NSGA2_ablation_no_adaptive_de": MechanismConfig(
             use_adaptive_de=False,
         ),
-        "improved_nsga2_ablation_no_obl_init": MechanismConfig(
+        "OADE_NSGA2_ablation_no_obl_init": MechanismConfig(
             use_obl_init=False,
         ),
-        "improved_nsga2_ablation_no_periodic_obl": MechanismConfig(
+        "OADE_NSGA2_ablation_no_periodic_obl": MechanismConfig(
             use_periodic_obl_injection=False,
         ),
-        "improved_nsga2_ablation_no_restart": MechanismConfig(
+        "OADE_NSGA2_ablation_no_restart": MechanismConfig(
             use_stagnation_restart=False,
         ),
     }
 
 
-def get_improved_incremental_configs() -> Dict[str, MechanismConfig]:
+def get_oade_incremental_configs() -> Dict[str, MechanismConfig]:
     """
     Incremental variants from a NSGA2-style internal baseline.
 
@@ -318,36 +318,36 @@ def get_improved_incremental_configs() -> Dict[str, MechanismConfig]:
     )
 
     return {
-        "improved_nsga2_incremental_baseline": baseline,
-        "improved_nsga2_incremental_plus_obl_init": MechanismConfig(
+        "OADE_NSGA2_incremental_baseline": baseline,
+        "OADE_NSGA2_incremental_plus_obl_init": MechanismConfig(
             use_obl_init=True,
             use_de_operator=False,
             use_adaptive_de=False,
             use_periodic_obl_injection=False,
             use_stagnation_restart=False,
         ),
-        "improved_nsga2_incremental_plus_de_fixed": MechanismConfig(
+        "OADE_NSGA2_incremental_plus_de_fixed": MechanismConfig(
             use_obl_init=False,
             use_de_operator=True,
             use_adaptive_de=False,
             use_periodic_obl_injection=False,
             use_stagnation_restart=False,
         ),
-        "improved_nsga2_incremental_plus_de_adaptive": MechanismConfig(
+        "OADE_NSGA2_incremental_plus_de_adaptive": MechanismConfig(
             use_obl_init=False,
             use_de_operator=True,
             use_adaptive_de=True,
             use_periodic_obl_injection=False,
             use_stagnation_restart=False,
         ),
-        "improved_nsga2_incremental_plus_periodic_obl": MechanismConfig(
+        "OADE_NSGA2_incremental_plus_periodic_obl": MechanismConfig(
             use_obl_init=False,
             use_de_operator=False,
             use_adaptive_de=False,
             use_periodic_obl_injection=True,
             use_stagnation_restart=False,
         ),
-        "improved_nsga2_incremental_plus_restart": MechanismConfig(
+        "OADE_NSGA2_incremental_plus_restart": MechanismConfig(
             use_obl_init=False,
             use_de_operator=False,
             use_adaptive_de=False,
@@ -359,8 +359,8 @@ def get_improved_incremental_configs() -> Dict[str, MechanismConfig]:
 
 def build_algorithm_runners(selected_names: Optional[Sequence[str]] = None) -> Dict[str, Callable[..., tuple[np.ndarray, np.ndarray]]]:
     pymoo_specs = get_pymoo_algorithm_specs()
-    ablation_configs = get_improved_ablation_configs()
-    incremental_configs = get_improved_incremental_configs()
+    ablation_configs = get_oade_ablation_configs()
+    incremental_configs = get_oade_incremental_configs()
 
     runners: Dict[str, Callable[..., tuple[np.ndarray, np.ndarray]]] = {}
 
@@ -372,7 +372,7 @@ def build_algorithm_runners(selected_names: Optional[Sequence[str]] = None) -> D
             n_gen: int,
             _cfg=ablation_cfg,
         ) -> tuple[np.ndarray, np.ndarray]:
-            return run_improved_nsga2(
+            return run_OADE_NSGA2(
                 problem=problem,
                 seed=seed,
                 pop_size=pop_size,
@@ -390,7 +390,7 @@ def build_algorithm_runners(selected_names: Optional[Sequence[str]] = None) -> D
             n_gen: int,
             _cfg=incremental_cfg,
         ) -> tuple[np.ndarray, np.ndarray]:
-            return run_improved_nsga2(
+            return run_OADE_NSGA2(
                 problem=problem,
                 seed=seed,
                 pop_size=pop_size,
@@ -784,7 +784,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         default=",".join(DEFAULT_ALGORITHMS),
         help=(
             "Comma-separated algorithm names. Available: "
-            "improved_nsga2,pymoo_nsga2,pymoo_rnsga2,pymoo_dnsga2,pymoo_mopso,pymoo_moead,pymoo_sms_emoa"
+            "OADE_NSGA2,pymoo_nsga2,pymoo_rnsga2,pymoo_dnsga2,pymoo_mopso,pymoo_moead,pymoo_sms_emoa"
         ),
     )
     parser.add_argument(
@@ -797,7 +797,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--csv", default=DEFAULT_CSV_PATH, help="Path to detailed CSV output")
     parser.add_argument("--summary-csv", default=DEFAULT_SUMMARY_CSV_PATH, help="Path to summary CSV output")
     parser.add_argument("--list-algorithms", action="store_true", help="Print supported algorithm names and exit")
-    parser.add_argument("--list-ablations", action="store_true", help="Print ablation variants for improved NSGA-II and exit")
+    parser.add_argument("--list-ablations", action="store_true", help="Print ablation variants for OADE_NSGA2 and exit")
     parser.add_argument("--list-incrementals", action="store_true", help="Print incremental variants from baseline and exit")
     return parser
 
@@ -813,14 +813,14 @@ def main() -> None:
         return
 
     if args.list_ablations:
-        print("Improved NSGA-II ablation variants:")
-        for name in sorted(get_improved_ablation_configs().keys()):
+        print("OADE_NSGA2 ablation variants:")
+        for name in sorted(get_oade_ablation_configs().keys()):
             print(f"- {name}")
         return
 
     if args.list_incrementals:
-        print("Improved NSGA-II incremental variants from baseline:")
-        for name in sorted(get_improved_incremental_configs().keys()):
+        print("OADE_NSGA2 incremental variants from baseline:")
+        for name in sorted(get_oade_incremental_configs().keys()):
             print(f"- {name}")
         return
 
@@ -842,3 +842,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+

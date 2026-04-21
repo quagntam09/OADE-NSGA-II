@@ -26,7 +26,7 @@ except ImportError as exc:  # pragma: no cover
 
 DEFAULT_RESULTS_CSV = "outputs/benchmark_results.csv"
 DEFAULT_OUTPUT_DIR = "outputs/statistics"
-DEFAULT_REFERENCE_ALGORITHM = "improved_nsga2"
+DEFAULT_REFERENCE_ALGORITHM = "OADE_NSGA2"
 
 
 def load_results(csv_path: str) -> List[Dict[str, object]]:
@@ -250,3 +250,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+

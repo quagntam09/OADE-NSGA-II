@@ -22,8 +22,8 @@ import numpy as np
 
 DEFAULT_SUMMARY_CSV = "outputs/benchmark_summary_ablation.csv"
 DEFAULT_OUTPUT_DIR = "outputs"
-DEFAULT_FULL_MODEL = "improved_nsga2"
-DEFAULT_ABLATION_PREFIX = "improved_nsga2_ablation_"
+DEFAULT_FULL_MODEL = "OADE_NSGA2"
+DEFAULT_ABLATION_PREFIX = "OADE_NSGA2_ablation_"
 DEFAULT_OUTPUT_PREFIX = "ablation"
 
 
@@ -274,3 +274,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
