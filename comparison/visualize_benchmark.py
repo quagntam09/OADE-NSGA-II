@@ -32,23 +32,31 @@ DEFAULT_RESULTS_CSV_PATH = "outputs/benchmark_results.csv"
 DEFAULT_SUMMARY_CSV_PATH = "outputs/benchmark_summary.csv"
 DEFAULT_ABLATION_SUMMARY_CSV_PATH = "outputs/benchmark_summary_ablation.csv"
 
-DEFAULT_HV_BEST_OUTPUT_PATH = "outputs/benchmark_hv_best_bar.png"
-DEFAULT_IGD_BEST_OUTPUT_PATH = "outputs/benchmark_igd_best_bar.png"
-DEFAULT_HV_MEAN_OUTPUT_PATH = "outputs/benchmark_hv_mean_bar.png"
-DEFAULT_IGD_MEAN_OUTPUT_PATH = "outputs/benchmark_igd_mean_bar.png"
+DEFAULT_ALGO_COMPARE_OUTPUT_DIR = "outputs/zdt_algorithm_compare"
+
+DEFAULT_HV_BEST_OUTPUT_PATH = f"{DEFAULT_ALGO_COMPARE_OUTPUT_DIR}/benchmark_hv_best_bar.png"
+DEFAULT_IGD_BEST_OUTPUT_PATH = f"{DEFAULT_ALGO_COMPARE_OUTPUT_DIR}/benchmark_igd_best_bar.png"
+DEFAULT_HV_MEAN_OUTPUT_PATH = f"{DEFAULT_ALGO_COMPARE_OUTPUT_DIR}/benchmark_hv_mean_bar.png"
+DEFAULT_IGD_MEAN_OUTPUT_PATH = f"{DEFAULT_ALGO_COMPARE_OUTPUT_DIR}/benchmark_igd_mean_bar.png"
 DEFAULT_HV_ABLATION_OUTPUT_PATH = "outputs/ablation_hv_bar.png"
 DEFAULT_IGD_ABLATION_OUTPUT_PATH = "outputs/ablation_igd_bar.png"
 
-DEFAULT_BEST_TABLE_PATH = "outputs/table_best_hv_igd.csv"
-DEFAULT_MEAN_TABLE_PATH = "outputs/table_mean_hv_igd.csv"
+DEFAULT_BEST_TABLE_PATH = f"{DEFAULT_ALGO_COMPARE_OUTPUT_DIR}/table_best_hv_igd.csv"
+DEFAULT_MEAN_TABLE_PATH = f"{DEFAULT_ALGO_COMPARE_OUTPUT_DIR}/table_mean_hv_igd.csv"
 DEFAULT_ABLATION_TABLE_PATH = "outputs/table_ablation_hv_igd.csv"
-DEFAULT_BEST_TABLE_MD_PATH = "outputs/table_best_hv_igd.md"
-DEFAULT_MEAN_TABLE_MD_PATH = "outputs/table_mean_hv_igd.md"
+DEFAULT_BEST_TABLE_MD_PATH = f"{DEFAULT_ALGO_COMPARE_OUTPUT_DIR}/table_best_hv_igd.md"
+DEFAULT_MEAN_TABLE_MD_PATH = f"{DEFAULT_ALGO_COMPARE_OUTPUT_DIR}/table_mean_hv_igd.md"
 DEFAULT_ABLATION_TABLE_MD_PATH = "outputs/table_ablation_hv_igd.md"
 
 DEFAULT_ABLATION_PREFIX = "OADE_NSGA2_ablation_"
 DEFAULT_FULL_ALGORITHM = "OADE_NSGA2"
 DEFAULT_LABEL_EXPONENT = -1
+
+
+def _normalize_algorithm_name(name: str) -> str:
+    if name.startswith("improved_nsga2"):
+        return name.replace("improved_nsga2", "OADE_NSGA2", 1)
+    return name
 
 
 def _format_scaled_label(value: float, digits: int = 2, exponent: int = DEFAULT_LABEL_EXPONENT) -> str:
@@ -64,7 +72,7 @@ def _load_results_csv(path: str) -> List[Dict[str, object]]:
             rows.append(
                 {
                     "problem": row["problem"],
-                    "algorithm": row["algorithm"],
+                    "algorithm": _normalize_algorithm_name(row["algorithm"]),
                     "hv": float(row["hv"]),
                     "igd": float(row["igd"]),
                 }
@@ -80,7 +88,7 @@ def _load_summary_csv(path: str) -> List[Dict[str, object]]:
             rows.append(
                 {
                     "problem": row["problem"],
-                    "algorithm": row["algorithm"],
+                    "algorithm": _normalize_algorithm_name(row["algorithm"]),
                     "runs": int(row.get("runs", "0")),
                     "hv_mean": float(row["hv_mean"]),
                     "hv_std": float(row["hv_std"]),
@@ -213,35 +221,22 @@ def _build_ablation_table(
     full_algorithm: str,
     ablation_prefix: str,
 ) -> List[Dict[str, object]]:
-    def _aliases(name: str) -> List[str]:
-        aliases = [name]
-        if name.startswith("OADE_NSGA2"):
-            aliases.append(name.replace("OADE_NSGA2", "improved_nsga2", 1))
-        elif name.startswith("improved_nsga2"):
-            aliases.append(name.replace("improved_nsga2", "OADE_NSGA2", 1))
-        return aliases
-
     lookup: Dict[Tuple[str, str], Dict[str, object]] = {
         (str(row["problem"]), str(row["algorithm"])): row for row in summary_rows
     }
 
     problems = sorted({str(row["problem"]) for row in summary_rows})
     algorithms = sorted({str(row["algorithm"]) for row in summary_rows})
-    ablation_prefixes = _aliases(ablation_prefix)
-    full_algorithm_names = _aliases(full_algorithm)
+    normalized_ablation_prefix = _normalize_algorithm_name(ablation_prefix)
+    normalized_full_algorithm = _normalize_algorithm_name(full_algorithm)
 
     ablation_algorithms = [
-        algo for algo in algorithms if any(algo.startswith(prefix) for prefix in ablation_prefixes)
+        algo for algo in algorithms if algo.startswith(normalized_ablation_prefix)
     ]
 
     table: List[Dict[str, object]] = []
     for problem in problems:
-        full_row = None
-        for full_name in full_algorithm_names:
-            full_key = (problem, full_name)
-            if full_key in lookup:
-                full_row = lookup[full_key]
-                break
+        full_row = lookup.get((problem, normalized_full_algorithm))
 
         if full_row is None:
             continue
@@ -417,6 +412,14 @@ def main() -> None:
         default=DEFAULT_ABLATION_SUMMARY_CSV_PATH,
         help="Path to ablation summary CSV",
     )
+    parser.add_argument(
+        "--algo-compare-output-dir",
+        default=DEFAULT_ALGO_COMPARE_OUTPUT_DIR,
+        help=(
+            "Output directory for algorithm-comparison artifacts (best/mean charts and best/mean tables). "
+            "Set empty string to disable auto-bundling."
+        ),
+    )
     parser.add_argument("--hv-best-output", default=DEFAULT_HV_BEST_OUTPUT_PATH)
     parser.add_argument("--igd-best-output", default=DEFAULT_IGD_BEST_OUTPUT_PATH)
     parser.add_argument("--hv-mean-output", default=DEFAULT_HV_MEAN_OUTPUT_PATH)
@@ -433,6 +436,17 @@ def main() -> None:
     parser.add_argument("--full-algorithm", default=DEFAULT_FULL_ALGORITHM)
     parser.add_argument("--ui-scale", type=float, default=1.0)
     args = parser.parse_args()
+
+    if args.algo_compare_output_dir:
+        compare_dir = Path(args.algo_compare_output_dir)
+        args.hv_best_output = str(compare_dir / "benchmark_hv_best_bar.png")
+        args.igd_best_output = str(compare_dir / "benchmark_igd_best_bar.png")
+        args.hv_mean_output = str(compare_dir / "benchmark_hv_mean_bar.png")
+        args.igd_mean_output = str(compare_dir / "benchmark_igd_mean_bar.png")
+        args.best_table_output = str(compare_dir / "table_best_hv_igd.csv")
+        args.mean_table_output = str(compare_dir / "table_mean_hv_igd.csv")
+        args.best_table_md_output = str(compare_dir / "table_best_hv_igd.md")
+        args.mean_table_md_output = str(compare_dir / "table_mean_hv_igd.md")
 
     results_path = Path(args.results_csv)
     summary_path = Path(args.summary_csv)

@@ -16,7 +16,7 @@ So sánh `OADE_NSGA2` với các thuật toán đa mục tiêu từ `pymoo` trê
 
 ## Chạy benchmark
 
-### Lệnh chạy đầy đủ (khuyến nghị)
+### Lệnh chạy đầy đủ
 
 ```powershell
 .\.venv\Scripts\python.exe comparison\benchmark.py --problems zdt1,zdt2,zdt3,zdt4,zdt6 --algorithms OADE_NSGA2,pymoo_nsga2,pymoo_rnsga2,pymoo_dnsga2,pymoo_mopso --seeds 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29 --pop-size 100 --n-gen 200 --csv outputs/benchmark_results.csv --summary-csv outputs/benchmark_summary.csv
@@ -127,36 +127,88 @@ File sinh ra:
 
 Lưu ý mặc định hiển thị nhãn cột:
 
-- Tất cả biểu đồ cột từ `comparison/visualize_benchmark.py` và `comparison/plot_hv_igd_from_table.py` đều hiển thị nhãn đã scale theo `×10^-1`.
+- Tất cả biểu đồ cột từ `comparison/visualize_benchmark.py` đều hiển thị nhãn đã scale theo `×10^-1`.
 - Trên cột chỉ hiện số rút gọn; chú thích scale được ghi một lần trên hình.
 
 ```powershell
-.\.venv\Scripts\python.exe comparison\visualize_benchmark.py outputs/benchmark_results.csv --summary-csv outputs/benchmark_summary.csv --ablation-summary-csv outputs/benchmark_summary_ablation.csv --igd-best-output outputs/benchmark_igd_best_bar.png --hv-best-output outputs/benchmark_hv_best_bar.png --igd-mean-output outputs/benchmark_igd_mean_bar.png --hv-mean-output outputs/benchmark_hv_mean_bar.png --igd-ablation-output outputs/ablation_igd_bar.png --hv-ablation-output outputs/ablation_hv_bar.png --best-table-output outputs/table_best_hv_igd.csv --mean-table-output outputs/table_mean_hv_igd.csv --ablation-table-output outputs/table_ablation_hv_igd.csv --best-table-md-output outputs/table_best_hv_igd.md --mean-table-md-output outputs/table_mean_hv_igd.md --ablation-table-md-output outputs/table_ablation_hv_igd.md --ui-scale 1.2
+.\.venv\Scripts\python.exe comparison\visualize_benchmark.py outputs/benchmark_results.csv --summary-csv outputs/benchmark_summary.csv --ablation-summary-csv outputs/benchmark_summary_ablation.csv --algo-compare-output-dir outputs/zdt_algorithm_compare --igd-ablation-output outputs/ablation_igd_bar.png --hv-ablation-output outputs/ablation_hv_bar.png --ablation-table-output outputs/table_ablation_hv_igd.csv --ablation-table-md-output outputs/table_ablation_hv_igd.md --ui-scale 1.2
 ```
 
 Kết quả đúng theo yêu cầu ban đầu:
 
-- Biểu đồ: `benchmark_igd_best_bar.png`, `benchmark_hv_best_bar.png`, `benchmark_igd_mean_bar.png`, `benchmark_hv_mean_bar.png`, `ablation_igd_bar.png`, `ablation_hv_bar.png`
-- Bảng CSV: `table_best_hv_igd.csv`, `table_mean_hv_igd.csv`, `table_ablation_hv_igd.csv`
-- Bảng Markdown: `table_best_hv_igd.md`, `table_mean_hv_igd.md`, `table_ablation_hv_igd.md`
+- Trong thư mục `outputs/zdt_algorithm_compare/` (gom phần so sánh thuật toán trên ZDT):
+    - Biểu đồ: `benchmark_igd_best_bar.png`, `benchmark_hv_best_bar.png`, `benchmark_igd_mean_bar.png`, `benchmark_hv_mean_bar.png`
+    - Bảng CSV: `table_best_hv_igd.csv`, `table_mean_hv_igd.csv`
+    - Bảng Markdown: `table_best_hv_igd.md`, `table_mean_hv_igd.md`
+- Ở thư mục `outputs/` (phần ablation):
+    - Biểu đồ: `ablation_igd_bar.png`, `ablation_hv_bar.png`
+    - Bảng CSV: `table_ablation_hv_igd.csv`
+    - Bảng Markdown: `table_ablation_hv_igd.md`
 
-### 4) (Tùy chọn) Vẽ 2 biểu đồ HV/IGD trực tiếp từ bảng ablation CSV
+### 4) So sánh mean HV/IGD: NSGA-II vs OADE-NSGA2 và tắt từng cơ chế
 
-```powershell
-.\.venv\Scripts\python.exe comparison\plot_hv_igd_from_table.py outputs/table_ablation_hv_igd.csv --hv-output outputs/ablation_hv_from_table.png --igd-output outputs/ablation_igd_from_table.png --ui-scale 1.2
-```
-
-Vẽ 2 biểu đồ HV/IGD từ bảng incremental so với `pymoo_nsga2`:
-
-```powershell
-.\.venv\Scripts\python.exe comparison\plot_hv_igd_from_table.py outputs/table_incremental_vs_nsga2_hv_igd.csv --hv-output outputs/incremental_vs_nsga2_hv_from_table.png --igd-output outputs/incremental_vs_nsga2_igd_from_table.png --ui-scale 1.2
-```
-
-### 5) (Tùy chọn) So sánh từng cơ chế incremental với NSGA2 gốc
+Lệnh nhanh (dùng file mặc định `outputs/benchmark_summary_ablation.csv`):
 
 ```powershell
-.\.venv\Scripts\python.exe comparison\visualize_benchmark.py outputs/benchmark_results_incremental.csv --summary-csv outputs/benchmark_summary_incremental.csv --ablation-summary-csv outputs/benchmark_summary_incremental.csv --full-algorithm pymoo_nsga2 --ablation-prefix OADE_NSGA2_incremental_ --igd-ablation-output outputs/incremental_vs_nsga2_igd_bar.png --hv-ablation-output outputs/incremental_vs_nsga2_hv_bar.png --ablation-table-output outputs/table_incremental_vs_nsga2_hv_igd.csv --ablation-table-md-output outputs/table_incremental_vs_nsga2_hv_igd.md --ui-scale 1.2
+.\.venv\Scripts\python.exe comparison\plot_nsga2_vs_oade_ablation_mean.py
 ```
+
+Vẽ bộ ảnh `best` tương tự (HV best và IGD best):
+
+```powershell
+.\.venv\Scripts\python.exe comparison\plot_nsga2_vs_oade_ablation_mean.py --plot-mode best --results-csv outputs/benchmark_results_ablation.csv
+```
+
+Vẽ cả hai bộ `mean` và `best` trong một lần chạy:
+
+```powershell
+.\.venv\Scripts\python.exe comparison\plot_nsga2_vs_oade_ablation_mean.py --plot-mode both --summary-csv outputs/benchmark_summary_ablation.csv --results-csv outputs/benchmark_results_ablation.csv
+```
+
+Lệnh đầy đủ (nếu muốn đổi input/output hoặc tên thuật toán):
+
+```powershell
+.\.venv\Scripts\python.exe comparison\plot_nsga2_vs_oade_ablation_mean.py --plot-mode mean --summary-csv outputs/benchmark_summary_ablation.csv --output-dir outputs/ablation_oade --nsga2-name pymoo_nsga2 --oade-full-name OADE_NSGA2 --ablation-prefix OADE_NSGA2_ablation_
+```
+
+Các ảnh được tạo trong `outputs/ablation_oade/`:
+
+- Cặp ảnh tổng quát:
+    - `mean_hv_nsga2_vs_oade.png`
+    - `mean_igd_nsga2_vs_oade.png`
+- Mỗi cơ chế tắt đi sẽ tạo 1 cặp ảnh HV/IGD:
+    - `mean_hv_ablation_no_adaptive_de.png`, `mean_igd_ablation_no_adaptive_de.png`
+    - `mean_hv_ablation_no_obl_init.png`, `mean_igd_ablation_no_obl_init.png`
+    - `mean_hv_ablation_no_periodic_obl.png`, `mean_igd_ablation_no_periodic_obl.png`
+    - `mean_hv_ablation_no_restart.png`, `mean_igd_ablation_no_restart.png`
+
+Bảng Markdown được tạo kèm theo:
+
+- Khi chạy `--plot-mode mean` hoặc `--plot-mode both`:
+    - `table_mean_hv_igd_compare.md`
+- Khi chạy `--plot-mode best` hoặc `--plot-mode both`:
+    - `table_best_hv_igd_compare.md`
+
+### 5) So sánh NSGA-II gốc + từng cơ chế OADE (ablation_nsga2)
+
+Mục tiêu đúng: mỗi cơ chế là so sánh 3 thuật toán trên cùng biểu đồ:
+
+- `pymoo_nsga2` (NSGA-II gốc)
+- `OADE_NSGA2_incremental_plus_<mechanism>` (tương ứng `NSGA-II + 1 cơ chế`; KHONG phải `OADE + 1 cơ chế`)
+- `OADE_NSGA2` (OADE full)
+
+Lệnh vẽ cả `mean` và `best` vào thư mục `outputs/ablation_nsga2`:
+
+```powershell
+.\.venv\Scripts\python.exe comparison\plot_nsga2_vs_oade_ablation_mean.py --plot-mode both --summary-csv outputs/benchmark_summary_incremental.csv --reference-summary-csv outputs/benchmark_summary_ablation.csv --results-csv outputs/benchmark_results_incremental.csv --reference-results-csv outputs/benchmark_results_ablation.csv --output-dir outputs/ablation_nsga2 --nsga2-name pymoo_nsga2 --oade-full-name OADE_NSGA2 --ablation-prefix OADE_NSGA2_incremental_plus_
+```
+
+Kết quả sẽ gồm:
+
+- Ảnh tổng quát NSGA-II vs full model (mean + best)
+- Ảnh cho từng cơ chế incremental theo bộ 3: `NSGA-II gốc` vs `NSGA-II + cơ chế` vs `OADE-NSGA2 full` (mean + best)
+- Với flow incremental, tên file theo mẫu `mean_hv_incremental_*.png`, `mean_igd_incremental_*.png`, `best_hv_incremental_*.png`, `best_igd_incremental_*.png`
+- Bảng Markdown: `table_mean_hv_igd_compare.md`, `table_best_hv_igd_compare.md`
 
 ## Cách chỉnh tham số
 

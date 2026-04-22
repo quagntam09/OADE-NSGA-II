@@ -28,7 +28,7 @@ from pymoo.problems import get_problem
 from pymoo.termination import get_termination
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 
-from algorithm_src.algorithm import MechanismConfig, NSGA2ImprovedSmart
+from algorithm_src.algorithm import MechanismConfig, OADENSGA2
 from algorithm_src.core import ProblemWrapper
 
 
@@ -265,7 +265,7 @@ def run_OADE_NSGA2(
     random.seed(seed)
 
     wrapped_problem = ProblemWrapper(problem)
-    solver = NSGA2ImprovedSmart(
+    solver = OADENSGA2(
         wrapped_problem,
         pop_size=pop_size,
         n_gen=n_gen,

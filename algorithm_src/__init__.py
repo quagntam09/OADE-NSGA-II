@@ -1,11 +1,11 @@
 """Algorithm package for NSGA-II core implementation."""
 
-from .algorithm import NSGA2ImprovedSmart
+from .algorithm import OADENSGA2
 from .baseline import NSGA2Baseline
 from .core import CreationMode, Individual, ProblemWrapper
 
 __all__ = [
-    "NSGA2ImprovedSmart",
+    "OADENSGA2",
     "NSGA2Baseline",
     "ProblemWrapper",
     "Individual",

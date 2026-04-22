@@ -49,7 +49,7 @@ class MechanismConfig:
     use_stagnation_restart: bool = True
 
 
-class NSGA2ImprovedSmart:
+class OADENSGA2:
     """
     NSGA-II cải tiến với DE thích nghi, OBL và partial restart khi trì trệ.
 
@@ -270,3 +270,5 @@ class NSGA2ImprovedSmart:
             lehmer_mean_F = float(np.mean(f_values ** 2) / np.mean(f_values))
             self.mean_F  = 0.9 * self.mean_F  + 0.1 * lehmer_mean_F
             self.mean_CR = 0.9 * self.mean_CR + 0.1 * float(np.mean(cr_values))
+
+

@@ -1,0 +1,34 @@
+# Best HV and IGD Comparison Table
+
+| problem | algorithm | hv_best | igd_best |
+| --- | --- | --- | --- |
+| zdt1 | pymoo_nsga2 | 0.869128 | 0.004335 |
+| zdt1 | OADE_NSGA2 | 0.871375 | 0.003984 |
+| zdt1 | OADE_NSGA2_ablation_no_adaptive_de | 0.871272 | 0.003921 |
+| zdt1 | OADE_NSGA2_ablation_no_obl_init | 0.871251 | 0.003951 |
+| zdt1 | OADE_NSGA2_ablation_no_periodic_obl | 0.871063 | 0.004226 |
+| zdt1 | OADE_NSGA2_ablation_no_restart | 0.871249 | 0.004057 |
+| zdt2 | pymoo_nsga2 | 0.534906 | 0.004887 |
+| zdt2 | OADE_NSGA2 | 0.537997 | 0.004079 |
+| zdt2 | OADE_NSGA2_ablation_no_adaptive_de | 0.538016 | 0.004189 |
+| zdt2 | OADE_NSGA2_ablation_no_obl_init | 0.537942 | 0.004461 |
+| zdt2 | OADE_NSGA2_ablation_no_periodic_obl | 0.537879 | 0.004445 |
+| zdt2 | OADE_NSGA2_ablation_no_restart | 0.538096 | 0.004159 |
+| zdt3 | pymoo_nsga2 | 1.094265 | 0.004533 |
+| zdt3 | OADE_NSGA2 | 1.096219 | 0.004643 |
+| zdt3 | OADE_NSGA2_ablation_no_adaptive_de | 1.096219 | 0.004456 |
+| zdt3 | OADE_NSGA2_ablation_no_obl_init | 1.096106 | 0.004610 |
+| zdt3 | OADE_NSGA2_ablation_no_periodic_obl | 1.096152 | 0.004780 |
+| zdt3 | OADE_NSGA2_ablation_no_restart | 1.096213 | 0.004436 |
+| zdt4 | pymoo_nsga2 | 0.867857 | 0.005217 |
+| zdt4 | OADE_NSGA2 | 0.869174 | 0.004610 |
+| zdt4 | OADE_NSGA2_ablation_no_adaptive_de | 0.869047 | 0.004712 |
+| zdt4 | OADE_NSGA2_ablation_no_obl_init | 0.867499 | 0.005269 |
+| zdt4 | OADE_NSGA2_ablation_no_periodic_obl | 0.814470 | 0.036556 |
+| zdt4 | OADE_NSGA2_ablation_no_restart | 0.868413 | 0.005052 |
+| zdt6 | pymoo_nsga2 | 0.386572 | 0.014466 |
+| zdt6 | OADE_NSGA2 | 0.404257 | 0.003243 |
+| zdt6 | OADE_NSGA2_ablation_no_adaptive_de | 0.404581 | 0.003432 |
+| zdt6 | OADE_NSGA2_ablation_no_obl_init | 0.403999 | 0.003460 |
+| zdt6 | OADE_NSGA2_ablation_no_periodic_obl | 0.404007 | 0.003576 |
+| zdt6 | OADE_NSGA2_ablation_no_restart | 0.404708 | 0.002823 |
