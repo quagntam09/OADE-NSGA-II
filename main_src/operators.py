@@ -89,8 +89,11 @@ def get_neighborhood_indices(population: List[Individual], n_neighbors: int) -> 
     F_norm = (F - f_min) / spread
 
     dists = cdist(F_norm, F_norm)
-    k     = min(n_neighbors, len(population) - 1)
-    return np.argpartition(dists, kth=k, axis=1)[:, :k]
+    np.fill_diagonal(dists, np.inf)  # loại chính nó khỏi tập láng giềng
+    k = min(n_neighbors, len(population) - 1)
+    if k <= 0:
+        return np.empty((len(population), 0), dtype=int)
+    return np.argpartition(dists, kth=k - 1, axis=1)[:, :k]
 
 
 # Đột biến DE thích nghi

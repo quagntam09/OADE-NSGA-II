@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import random
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List
@@ -36,6 +37,9 @@ class RunMetrics:
     hv: float
 
 
+SUPPORTED_ALGORITHMS = ("OADE_NSGAII", "NSGA2", "RNSGA2", "DNSGA2")
+
+
 def non_dominated(F: np.ndarray) -> np.ndarray:
     nds = NonDominatedSorting()
     front = nds.do(F, only_non_dominated_front=True)
@@ -49,8 +53,46 @@ def make_initial_population(problem, pop_size: int, seed: int) -> np.ndarray:
     return rng.uniform(xl, xu, size=(pop_size, problem.n_var))
 
 
+def validate_algorithms(algorithms: List[str]) -> List[str]:
+    unknown = [name for name in algorithms if name not in SUPPORTED_ALGORITHMS]
+    if unknown:
+        raise ValueError(
+            f"Unsupported algorithms in config: {unknown}. "
+            f"Supported: {list(SUPPORTED_ALGORITHMS)}"
+        )
+    return algorithms
+
+
+def make_rnsga2_ref_points(problem, initial_x: np.ndarray) -> np.ndarray:
+    """
+    Tạo aspiration points cho R-NSGA-II từ objective values của quần thể ban đầu.
+    Không dùng Pareto front thật để tránh lợi thế oracle khi benchmark.
+    """
+    F0 = np.asarray(problem.evaluate(initial_x))
+    if F0.ndim != 2:
+        raise ValueError("problem.evaluate(initial_x) must return a 2D objective matrix")
+
+    f_min = F0.min(axis=0)
+    f_max = F0.max(axis=0)
+    span = np.where((f_max - f_min) < 1e-12, 1.0, f_max - f_min)
+    n_obj = F0.shape[1]
+
+    if n_obj == 1:
+        return (f_min + 0.1 * span)[None, :]
+
+    rp1 = f_min + 0.2 * span
+    rp2 = f_min + 0.2 * span
+    rp1[0] = f_min[0] + 0.05 * span[0]
+    rp2[0] = f_min[0] + 0.45 * span[0]
+    rp1[-1] = f_min[-1] + 0.45 * span[-1]
+    rp2[-1] = f_min[-1] + 0.05 * span[-1]
+
+    return np.vstack([rp1, rp2])
+
+
 def run_oade(problem, pop_size: int, n_gen: int, initial_x: np.ndarray, seed: int, oade_cfg: dict) -> np.ndarray:
     np.random.seed(seed)
+    random.seed(seed)
     solver = OADE_NSGAII(ProblemWrapper(problem), pop_size=pop_size, n_gen=n_gen)
 
     solver.stagnation_patience = int(oade_cfg["stagnation_patience"])
@@ -71,8 +113,7 @@ def run_nsga2(problem, pop_size: int, n_gen: int, initial_x: np.ndarray, seed: i
     return non_dominated(res.F)
 
 
-def run_rnsga2(problem, pop_size: int, n_gen: int, initial_x: np.ndarray, seed: int, pf: np.ndarray) -> np.ndarray:
-    ref_points = np.vstack([pf[0], pf[len(pf) // 2]])
+def run_rnsga2(problem, pop_size: int, n_gen: int, initial_x: np.ndarray, seed: int, ref_points: np.ndarray) -> np.ndarray:
     algorithm = RNSGA2(ref_points=ref_points, pop_size=pop_size, sampling=initial_x)
     res = minimize(problem, algorithm, termination=("n_gen", n_gen), seed=seed, verbose=False)
     return non_dominated(res.F)
@@ -89,12 +130,18 @@ def summarize(metrics: Dict[str, List[RunMetrics]]) -> Dict[str, Dict[str, float
     for name, values in metrics.items():
         igd_values = np.array([m.igd for m in values], dtype=float)
         hv_values = np.array([m.hv for m in values], dtype=float)
+        if len(values) >= 2:
+            igd_std = float(np.std(igd_values, ddof=1))
+            hv_std = float(np.std(hv_values, ddof=1))
+        else:
+            igd_std = 0.0
+            hv_std = 0.0
         out[name] = {
             "igd_mean": float(np.mean(igd_values)),
-            "igd_std": float(np.std(igd_values, ddof=1)),
+            "igd_std": igd_std,
             "igd_best": float(np.min(igd_values)),
             "hv_mean": float(np.mean(hv_values)),
-            "hv_std": float(np.std(hv_values, ddof=1)),
+            "hv_std": hv_std,
             "hv_best": float(np.max(hv_values)),
         }
     return out
@@ -126,22 +173,27 @@ def run_one_problem(problem_name: str, n_var: int | None, cfg: dict, out_dir: Pa
     pop_size = int(cfg["global"]["pop_size"])
     n_gen = int(cfg["global"]["n_gen"])
     seed_base = int(cfg["global"]["seed_base"])
-    algorithms = list(cfg["algorithms"])
+    algorithms = validate_algorithms(list(cfg["algorithms"]))
 
     metrics: Dict[str, List[RunMetrics]] = {name: [] for name in algorithms}
 
     for run_idx in range(runs):
         seed = seed_base + run_idx
         initial_x = make_initial_population(problem, pop_size, seed)
+        rnsga2_ref_points = make_rnsga2_ref_points(problem, initial_x)
 
-        fronts = {
-            "OADE_NSGAII": run_oade(problem, pop_size, n_gen, initial_x, seed, cfg["oade"]),
-            "NSGA2": run_nsga2(problem, pop_size, n_gen, initial_x, seed),
-            "RNSGA2": run_rnsga2(problem, pop_size, n_gen, initial_x, seed, pf),
-            "DNSGA2": run_dnsga2(problem, pop_size, n_gen, initial_x, seed),
-        }
+        for name in algorithms:
+            if name == "OADE_NSGAII":
+                front = run_oade(problem, pop_size, n_gen, initial_x, seed, cfg["oade"])
+            elif name == "NSGA2":
+                front = run_nsga2(problem, pop_size, n_gen, initial_x, seed)
+            elif name == "RNSGA2":
+                front = run_rnsga2(problem, pop_size, n_gen, initial_x, seed, rnsga2_ref_points)
+            elif name == "DNSGA2":
+                front = run_dnsga2(problem, pop_size, n_gen, initial_x, seed)
+            else:
+                raise ValueError(f"Unsupported algorithm: {name}")
 
-        for name, front in fronts.items():
             metrics[name].append(RunMetrics(igd=float(igd_indicator(front)), hv=float(hv_indicator(front))))
 
         print(f"[{problem_name}] run {run_idx + 1}/{runs} done (seed={seed}).")
