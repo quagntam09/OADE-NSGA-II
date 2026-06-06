@@ -1,0 +1,70 @@
+global:
+  runs: 30
+  n_gen: 200
+  seed_base: 42
+  out_dir: sensitivity_analysis/results
+  alpha: 0.05
+
+baseline:
+  pop_size: 100
+  stagnation_patience: 20
+  stagnation_tolerance: 0.0001
+  restart_elite_ratio: 0.30
+  prob_de: 0.5
+  n_neighbors: 5
+  mean_F: 0.65
+  mean_CR: 0.5
+
+problems:
+  - name: zdt1
+    n_var: 30
+  - name: zdt2
+    n_var: 30
+  - name: zdt3
+    n_var: 30
+  - name: zdt4
+    n_var: 10
+  - name: zdt6
+    n_var: 10
+
+studies:
+  - name: pop_size
+    parameter: pop_size
+    baseline: 100
+    values:
+      - 50
+      - 100
+      - 200
+
+  - name: stagnation_patience
+    parameter: stagnation_patience
+    baseline: 20
+    values:
+      - 5
+      - 10
+      - 15
+      - 20
+      - 25
+      - 30
+      - 40
+
+  - name: f_cr_init
+    parameter: f_cr_init
+    baseline: fixed_baseline
+    values:
+      - label: fixed_baseline
+        mean_F: 0.65
+        mean_CR: 0.5
+      - label: low_init
+        mean_F: 0.4
+        mean_CR: 0.1
+      - label: high_init
+        mean_F: 0.9
+        mean_CR: 0.9
+      - label: random_uniform
+        mean_F_range:
+          - 0.4
+          - 0.9
+        mean_CR_range:
+          - 0.1
+          - 0.9
