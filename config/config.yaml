@@ -1,0 +1,37 @@
+global:
+  runs: 30
+  pop_size: 100
+  n_gen: 200
+  seed_base: 42
+  out_dir: results_zdt
+
+oade:
+  stagnation_patience: 20
+  stagnation_tolerance: 0.0001
+  restart_elite_ratio: 0.30
+  prob_de: 0.5
+  n_neighbors: 5
+  mean_F: 0.65
+  mean_CR: 0.5
+
+problems:
+  - name: zdt1
+    n_var: 30
+  - name: zdt2
+    n_var: 30
+  - name: zdt3
+    n_var: 30
+  - name: zdt4
+    n_var: 10
+  - name: zdt6
+    n_var: 10
+
+algorithms:
+  - OADE_NSGAII
+  - NSGA2
+  - RNSGA2
+  - DNSGA2
+
+statistics:
+  alpha: 0.05
+  reference_algorithm: OADE_NSGAII
