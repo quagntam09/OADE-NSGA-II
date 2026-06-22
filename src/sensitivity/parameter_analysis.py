@@ -1,17 +1,9 @@
-"""
-Run parameter sensitivity experiments for OADE-NSGA-II.
-
-This script is intentionally separate from the main benchmark config and plot
-script. It writes raw per-run metrics, summary tables, statistical tests, and
-F/CR traces into sensitivity_analysis/results by default.
-"""
+"""Run parameter sensitivity experiments for OADE-NSGA-II."""
 
 from __future__ import annotations
 
 import argparse
-import csv
 import random
-import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -23,14 +15,13 @@ from pymoo.indicators.igd import IGD
 from pymoo.problems import get_problem
 from scipy.stats import friedmanchisquare, wilcoxon
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
-from benchmark_pymoo_compare import load_yaml_config, make_initial_population, non_dominated
-from main_src import OADE_NSGAII, ProblemWrapper
+from src.benchmarking.pymoo_compare import make_initial_population, non_dominated
+from src.oade_nsga2 import OADE_NSGAII, ProblemWrapper
+from src.utils.config import load_yaml_config
+from src.utils.csv_io import write_csv
 
 
+DEFAULT_CONFIG_PATH = Path("config") / "sensitivity.yaml"
 RAW_FIELDNAMES = [
     "study",
     "parameter",
@@ -119,14 +110,6 @@ class TrackingOADE_NSGAII(OADE_NSGAII):
     def _partial_restart(self) -> None:
         self.restart_count += 1
         super()._partial_restart()
-
-
-def write_csv(path: Path, rows: list[dict], fieldnames: list[str]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
 
 
 def std(values: list[float]) -> float:
@@ -459,10 +442,10 @@ def statistical_tests(
     return stats_rows
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default=str(Path(__file__).with_name("config.yaml")))
-    args = parser.parse_args()
+    parser.add_argument("--config", type=str, default=str(DEFAULT_CONFIG_PATH))
+    args = parser.parse_args(argv)
 
     cfg = load_yaml_config(Path(args.config))
     out_dir = Path(cfg["global"]["out_dir"])
@@ -500,7 +483,7 @@ def main() -> None:
     print(f"Saved: {(out_dir / 'sensitivity_summary.csv').as_posix()}")
     print(f"Saved: {(out_dir / 'sensitivity_statistics.csv').as_posix()}")
     print(f"Saved: {(out_dir / 'sensitivity_fcr_trace.csv').as_posix()}")
-    print("Plot with: python sensitivity_analysis/plot_parameter_sensitivity.py")
+    print("Plot with: python main.py plot-sensitivity")
 
 
 if __name__ == "__main__":

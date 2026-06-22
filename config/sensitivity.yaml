@@ -2,7 +2,7 @@ global:
   runs: 30
   n_gen: 200
   seed_base: 42
-  out_dir: sensitivity_analysis/results
+  out_dir: results/sensitivity
   alpha: 0.05
 
 baseline:

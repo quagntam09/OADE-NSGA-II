@@ -1,0 +1,19 @@
+all_problems:
+  results_dir: results/benchmark
+  mean_std_csv: all_problems_igd_hv_mean_std.csv
+  best_csv: all_problems_igd_hv_best.csv
+  outputs:
+    igd_mean_std: plot_igd_mean_std.png
+    hv_mean_std: plot_hv_mean_std.png
+    igd_best: plot_igd_best.png
+    hv_best: plot_hv_best.png
+
+wilcoxon:
+  input: results/benchmark/all_problems_wilcoxon_rank_sum.csv
+  out_dir: results/benchmark/wilcoxon_plots
+
+sensitivity:
+  results_dir: results/sensitivity
+  plots_dir: plots
+  summary_csv: sensitivity_summary.csv
+  trace_csv: sensitivity_fcr_trace.csv

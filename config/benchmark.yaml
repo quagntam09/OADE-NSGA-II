@@ -3,7 +3,7 @@ global:
   pop_size: 100
   n_gen: 200
   seed_base: 42
-  out_dir: results_zdt
+  out_dir: results/benchmark
 
 oade:
   stagnation_patience: 20

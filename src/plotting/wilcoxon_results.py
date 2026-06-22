@@ -3,32 +3,24 @@
 from __future__ import annotations
 
 import argparse
-import csv
 import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 
+from src.utils.config import load_yaml_config
+from src.utils.csv_io import read_csv
 
+from .common import ordered_unique
+
+
+DEFAULT_CONFIG_PATH = Path("config") / "plotting.yaml"
 RESULT_COLORS = {
     "comparison_better": "#d95f02",
     "no_significant_difference": "#bdbdbd",
     "reference_better": "#1b9e77",
 }
-
-
-def read_csv(path: Path) -> list[dict]:
-    with path.open("r", encoding="utf-8", newline="") as f:
-        return list(csv.DictReader(f))
-
-
-def ordered_unique(values) -> list[str]:
-    out = []
-    for value in values:
-        if value not in out:
-            out.append(value)
-    return out
 
 
 def lookup(rows: list[dict], problem: str, metric: str, comparison: str) -> dict | None:
@@ -67,7 +59,7 @@ def plot_pvalue_heatmap(rows: list[dict], out_dir: Path) -> None:
         ax.set_xticks(range(len(comparisons)))
         ax.set_xticklabels(comparisons)
         ax.set_yticks(range(len(problems)))
-        ax.set_yticklabels([p.upper() for p in problems])
+        ax.set_yticklabels([problem.upper() for problem in problems])
 
         for i in range(len(problems)):
             for j in range(len(comparisons)):
@@ -115,7 +107,7 @@ def plot_result_heatmap(rows: list[dict], out_dir: Path) -> None:
         ax.set_xticks(range(len(comparisons)))
         ax.set_xticklabels(comparisons)
         ax.set_yticks(range(len(problems)))
-        ax.set_yticklabels([p.upper() for p in problems])
+        ax.set_yticklabels([problem.upper() for problem in problems])
 
         for i in range(len(problems)):
             for j in range(len(comparisons)):
@@ -177,14 +169,14 @@ def plot_result_counts(rows: list[dict], out_dir: Path) -> None:
     plt.close(fig)
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input", type=str, default="results_zdt/all_problems_wilcoxon_rank_sum.csv")
-    parser.add_argument("--out-dir", type=str, default="results_zdt/wilcoxon_plots")
-    args = parser.parse_args()
+    parser.add_argument("--config", type=str, default=str(DEFAULT_CONFIG_PATH))
+    args = parser.parse_args(argv)
 
-    rows = read_csv(Path(args.input))
-    out_dir = Path(args.out_dir)
+    cfg = load_yaml_config(Path(args.config))["wilcoxon"]
+    rows = read_csv(Path(cfg["input"]))
+    out_dir = Path(cfg["out_dir"])
     out_dir.mkdir(parents=True, exist_ok=True)
 
     plot_pvalue_heatmap(rows, out_dir)

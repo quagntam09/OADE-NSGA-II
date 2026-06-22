@@ -1,36 +1,20 @@
-"""
-Plot parameter sensitivity outputs.
-
-Input files are produced by run_parameter_sensitivity.py. This script does not
-touch the main plot_all_problems.py benchmark plotting script.
-"""
+"""Plot parameter sensitivity outputs."""
 
 from __future__ import annotations
 
 import argparse
-import csv
 import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-from matplotlib.ticker import ScalarFormatter
+
+from src.utils.config import load_yaml_config
+from src.utils.csv_io import read_csv
+
+from .common import ordered_unique, style_scientific_y_axis, to_float
 
 
-def read_csv(path: Path) -> list[dict]:
-    with path.open("r", encoding="utf-8", newline="") as f:
-        return list(csv.DictReader(f))
-
-
-def to_float(value: str) -> float:
-    return float(value) if value not in {"", None} else float("nan")
-
-
-def ordered_unique(values) -> list[str]:
-    out = []
-    for value in values:
-        if value not in out:
-            out.append(value)
-    return out
+DEFAULT_CONFIG_PATH = Path("config") / "plotting.yaml"
 
 
 def summary_lookup(summary_rows: list[dict], study: str, problem: str, label: str) -> dict | None:
@@ -38,13 +22,6 @@ def summary_lookup(summary_rows: list[dict], study: str, problem: str, label: st
         if row["study"] == study and row["problem"] == problem and row["parameter_label"] == label:
             return row
     return None
-
-
-def style_axis(ax) -> None:
-    ax.grid(axis="y", linestyle="--", alpha=0.3)
-    formatter = ScalarFormatter(useMathText=True)
-    formatter.set_powerlimits((-2, 2))
-    ax.yaxis.set_major_formatter(formatter)
 
 
 def plot_metric(summary_rows: list[dict], study: str, metric: str, out_dir: Path) -> None:
@@ -73,7 +50,7 @@ def plot_metric(summary_rows: list[dict], study: str, metric: str, out_dir: Path
         ax.set_ylabel(metric)
         ax.set_xticks(x)
         ax.set_xticklabels(labels, rotation=35, ha="right")
-        style_axis(ax)
+        style_scientific_y_axis(ax)
 
     for idx in range(len(problems), nrows * ncols):
         axes[idx // ncols][idx % ncols].axis("off")
@@ -104,7 +81,7 @@ def plot_runtime_restart(summary_rows: list[dict], study: str, out_dir: Path) ->
             ax.plot(labels, values, marker="o", linewidth=1.4, label=problem.upper())
         ax.set_title(title)
         ax.tick_params(axis="x", rotation=35)
-        style_axis(ax)
+        style_scientific_y_axis(ax)
 
     axes[0][0].set_ylabel("seconds")
     axes[0][1].set_ylabel("mean restarts")
@@ -141,7 +118,7 @@ def plot_fcr_trace(trace_rows: list[dict], out_dir: Path) -> None:
     axes[0][1].set_title("Mean CR trace")
     for ax in axes[0]:
         ax.set_xlabel("generation")
-        style_axis(ax)
+        style_scientific_y_axis(ax)
     axes[0][0].set_ylabel("mean F")
     axes[0][1].set_ylabel("mean CR")
     axes[0][1].legend(loc="best", fontsize=8)
@@ -151,17 +128,18 @@ def plot_fcr_trace(trace_rows: list[dict], out_dir: Path) -> None:
     plt.close(fig)
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--results-dir", type=str, default="sensitivity_analysis/results")
-    args = parser.parse_args()
+    parser.add_argument("--config", type=str, default=str(DEFAULT_CONFIG_PATH))
+    args = parser.parse_args(argv)
 
-    results_dir = Path(args.results_dir)
-    plots_dir = results_dir / "plots"
+    cfg = load_yaml_config(Path(args.config))["sensitivity"]
+    results_dir = Path(cfg["results_dir"])
+    plots_dir = results_dir / str(cfg["plots_dir"])
     plots_dir.mkdir(parents=True, exist_ok=True)
 
-    summary_rows = read_csv(results_dir / "sensitivity_summary.csv")
-    trace_rows = read_csv(results_dir / "sensitivity_fcr_trace.csv")
+    summary_rows = read_csv(results_dir / str(cfg["summary_csv"]))
+    trace_rows = read_csv(results_dir / str(cfg["trace_csv"]))
     studies = ordered_unique(row["study"] for row in summary_rows)
 
     for study in studies:
