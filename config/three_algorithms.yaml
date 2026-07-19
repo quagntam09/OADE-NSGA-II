@@ -1,0 +1,55 @@
+global:
+  runs: 30
+  pop_size: 100
+  n_gen: 200
+  seed_base: 42
+  out_dir: results/three_algorithms
+
+problems:
+  - name: zdt1
+    n_var: 30
+  - name: zdt2
+    n_var: 30
+  - name: zdt3
+    n_var: 30
+  - name: zdt4
+    n_var: 10
+  - name: zdt6
+    n_var: 10
+
+algorithms:
+  - OADE_NSGAII
+  - NSGAII_SDR_OLS
+  - CE_MOEA
+
+oade:
+  stagnation_patience: 20
+  stagnation_tolerance: 0.0001
+  restart_elite_ratio: 0.30
+  prob_de: 0.5
+  n_neighbors: 5
+  mean_F: 0.65
+  mean_CR: 0.5
+
+nsga2_sdr_ols:
+  mu: 0.0
+  sigma: 0.1
+  local_search_max_neighbors_factor: 2
+  crossover_prob: 0.9
+  mutation_prob: null
+  eta_c: 20.0
+  eta_m: 20.0
+
+ce_moea:
+  F_DE: 0.7
+  CR: 0.5
+  p_m: 0.02
+  eta_m: 20.0
+
+plots:
+  igd_mean_std: plot_igd_mean_std.png
+  igd_mean_std_log: plot_igd_mean_std_log.png
+  hv_mean_std: plot_hv_mean_std.png
+  igd_best: plot_igd_best.png
+  igd_best_log: plot_igd_best_log.png
+  hv_best: plot_hv_best.png

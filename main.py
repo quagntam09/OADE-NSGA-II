@@ -6,8 +6,8 @@ import argparse
 import sys
 from typing import Callable
 
-from src.benchmarking import pymoo_compare
-from src.plotting import all_problems, parameter_sensitivity, wilcoxon_results
+from src.benchmarking import pymoo_compare, three_algorithm_compare
+from src.plotting import all_problems, parameter_sensitivity, three_algorithm_compare as three_algorithm_plots, wilcoxon_results
 from src.sensitivity import parameter_analysis
 
 
@@ -16,7 +16,9 @@ Command = Callable[[list[str] | None], None]
 
 COMMANDS: dict[str, Command] = {
     "benchmark": pymoo_compare.main,
+    "benchmark-three-algorithms": three_algorithm_compare.main,
     "plot-all": all_problems.main,
+    "plot-three-algorithms": three_algorithm_plots.main,
     "plot-wilcoxon": wilcoxon_results.main,
     "sensitivity": parameter_analysis.main,
     "plot-sensitivity": parameter_sensitivity.main,
