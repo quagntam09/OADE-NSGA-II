@@ -1,0 +1,6 @@
+name: RNSGA2
+runner: pymoo
+class_path: pymoo.algorithms.moo.rnsga2.RNSGA2
+sampling: initial_population
+auto_ref_points: true
+params:

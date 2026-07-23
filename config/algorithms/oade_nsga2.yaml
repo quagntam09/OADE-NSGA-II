@@ -1,0 +1,11 @@
+name: OADE_NSGAII
+runner: local_oade
+params:
+  stagnation_patience: 20
+  stagnation_tolerance: 0.0001
+  restart_elite_ratio: 0.30
+  prob_de: 0.5
+  n_neighbors: 5
+  mean_F: 0.65
+  mean_CR: 0.5
+

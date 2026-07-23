@@ -1,0 +1,11 @@
+name: NSGAII_SDR_OLS
+runner: local_nsga2_sdr_ols
+params:
+  mu: 0.0
+  sigma: 0.1
+  local_search_max_neighbors_factor: 2
+  crossover_prob: 0.9
+  mutation_prob: null
+  eta_c: 20.0
+  eta_m: 20.0
+

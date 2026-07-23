@@ -1,0 +1,35 @@
+global:
+  runs: 10
+  pop_size: 100
+  n_gen: 200
+  seed_base: 42
+  out_dir: results/algorithm_benchmark
+
+problems:
+  - name: zdt1
+    n_var: 30
+  - name: zdt2
+    n_var: 30
+  - name: zdt3
+    n_var: 30
+  - name: zdt4
+    n_var: 10
+  - name: zdt6
+    n_var: 10
+
+algorithm_configs:
+  - config/algorithms/oade_nsga2.yaml
+  - config/algorithms/nsga2.yaml
+  - config/algorithms/rnsga2.yaml
+  # - config/algorithms/dnsga2.yaml
+  - config/algorithms/cgde_nsga2.yaml
+  - config/algorithms/nsga2_sdr_ols.yaml
+  # - config/algorithms/ce_moea.yaml
+
+plots:
+  igd_mean_std: plot_igd_mean_std.png
+  igd_mean_std_log: plot_igd_mean_std_log.png
+  hv_mean_std: plot_hv_mean_std.png
+  igd_best: plot_igd_best.png
+  igd_best_log: plot_igd_best_log.png
+  hv_best: plot_hv_best.png

@@ -1,0 +1,8 @@
+name: CE_MOEA
+runner: local_ce_moea
+params:
+  F_DE: 0.7
+  CR: 0.5
+  p_m: 0.02
+  eta_m: 20.0
+

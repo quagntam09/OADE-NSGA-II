@@ -1,0 +1,5 @@
+name: NSGA2
+runner: pymoo
+class_path: pymoo.algorithms.moo.nsga2.NSGA2
+sampling: initial_population
+params:

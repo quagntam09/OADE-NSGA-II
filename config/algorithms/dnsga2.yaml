@@ -1,0 +1,5 @@
+name: DNSGA2
+runner: pymoo
+class_path: pymoo.algorithms.moo.dnsga2.DNSGA2
+sampling: initial_population
+params:

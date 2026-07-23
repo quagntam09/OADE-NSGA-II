@@ -1,0 +1,10 @@
+name: CGDE_NSGAII
+runner: local_cgde_nsga2
+params:
+  F: 0.5
+  CR: 0.9
+  pbest_ratio: 0.2
+  archive_size_factor: 1.0
+  mutation_prob: null
+  eta_m: 20.0
+

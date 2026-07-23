@@ -1,4 +1,4 @@
-"""Plot the three-algorithm ZDT comparison."""
+"""Plot unified algorithm benchmark outputs."""
 
 from __future__ import annotations
 
@@ -10,13 +10,14 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from src.benchmarking.algorithm_benchmark import SUMMARY_CSV
 from src.utils.config import load_yaml_config
 from src.utils.csv_io import read_csv
 
 from .common import ordered_unique, style_scientific_y_axis, to_float
 
 
-DEFAULT_CONFIG_PATH = Path("config") / "three_algorithms.yaml"
+DEFAULT_CONFIG_PATH = Path("config") / "algorithm_benchmark.yaml"
 
 
 def plot_metric(rows: list[dict], metric: str, out_path: Path, with_error: bool, y_scale: str = "linear") -> None:
@@ -24,9 +25,9 @@ def plot_metric(rows: list[dict], metric: str, out_path: Path, with_error: bool,
     algorithms = ordered_unique(row["algorithm"] for row in rows)
     data = {(row["problem"], row["algorithm"]): row for row in rows}
 
-    width = min(0.25, 0.8 / max(1, len(algorithms)))
+    width = min(0.22, 0.8 / max(1, len(algorithms)))
     x = list(range(len(problems)))
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(14, 7))
 
     for i, algorithm in enumerate(algorithms):
         xpos = [value + (i - (len(algorithms) - 1) / 2) * width for value in x]
@@ -42,7 +43,7 @@ def plot_metric(rows: list[dict], metric: str, out_path: Path, with_error: bool,
     ax.set_xticklabels([problem.upper() for problem in problems])
     ax.set_ylabel(metric.upper())
     scale_label = " Log Scale" if y_scale == "log" else ""
-    ax.set_title(f"{metric.upper()} {'Mean +/- Std' if with_error else 'Best'}{scale_label}: 3-Algorithm ZDT Comparison")
+    ax.set_title(f"{metric.upper()} {'Mean +/- Std' if with_error else 'Best'}{scale_label}: Algorithm Benchmark")
     ax.legend()
     style_scientific_y_axis(ax)
     if y_scale == "log":
@@ -51,8 +52,9 @@ def plot_metric(rows: list[dict], metric: str, out_path: Path, with_error: bool,
         ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 2))
 
     heights = [patch.get_height() for patch in ax.patches]
-    if heights and y_scale != "log":
-        ax.set_ylim(0, max(heights) * 1.12)
+    max_height = max(heights) if heights else 0.0
+    if max_height > 0.0 and y_scale != "log":
+        ax.set_ylim(0, max_height * 1.12)
 
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -67,7 +69,7 @@ def main(argv: list[str] | None = None) -> None:
 
     cfg = load_yaml_config(Path(args.config))
     out_dir = Path(cfg["global"]["out_dir"])
-    rows = read_csv(out_dir / "three_algorithms_igd_hv_summary.csv")
+    rows = read_csv(out_dir / SUMMARY_CSV)
     outputs = cfg["plots"]
 
     plot_metric(rows, "IGD", out_dir / str(outputs["igd_mean_std"]), with_error=True)
