@@ -1,5 +1,5 @@
 global:
-  runs: 10
+  runs: 20
   pop_size: 100
   n_gen: 200
   seed_base: 42
